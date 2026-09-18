@@ -6,6 +6,7 @@ import ScrollProgress from '@/components/ScrollProgress';
 import { ContactModal } from '@/components/ContactModal';
 import { useSmoothScroll } from '@/hooks/useSmoothScroll';
 import AdminPage from '@/pages/AdminPage';
+import { ScreenUploadProvider } from '@/components/three/UploadPreview';
 
 import Hero from '@/sections/Hero';
 import Statement from '@/sections/Statement';
@@ -40,7 +41,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <ScreenUploadProvider>
       {loading && (
         <Loader
           onDone={() => {
@@ -68,6 +69,6 @@ export default function App() {
       </main>
 
       <Footer />
-    </>
+    </ScreenUploadProvider>
   );
 }

@@ -195,3 +195,203 @@ a, button {
   cursor: pointer;
   box-shadow: 0 0 0 4px rgba(255, 20, 147, 0.18);
 }
+/* ================================================================== */
+/* HERO — 3D drone canvas                                              */
+/* ================================================================== */
+
+.c2a-hero__scene canvas {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  /* Let the page scroll on touch devices; the drone still reacts to taps. */
+  touch-action: pan-y;
+}
+
+/* Slight lift on desktop so the LED banner isn't cut by the hero bottom. */
+@media (min-width: 1024px) {
+  .c2a-hero__scene {
+    transform: translateY(-2%);
+  }
+}
+/* ================================================================== */
+/* HERO — signal tower bridge                                          */
+/* ================================================================== */
+
+.c2a-bridge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 170px 0;
+}
+
+/* Vertical connector line with a moving shimmer */
+.c2a-bridge__line {
+  position: relative;
+  width: 1px;
+  height: 56px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(230, 0, 126, 0.5),
+    transparent
+  );
+  overflow: hidden;
+}
+
+.c2a-bridge__line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 20, 147, 1),
+    transparent
+  );
+  transform: translateY(-100%);
+  animation: c2a-bridge-shimmer 3.2s ease-in-out infinite;
+}
+
+@keyframes c2a-bridge-shimmer {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  25%  { opacity: 1; }
+  75%  { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+/* Pulse dots along the tower */
+.c2a-bridge__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff1493;
+  box-shadow:
+    0 0 8px rgba(255, 20, 147, 1),
+    0 0 18px rgba(255, 20, 147, 0.55);
+  animation: c2a-bridge-dot 2.4s ease-in-out infinite;
+}
+
+.c2a-bridge__dot--lg {
+  width: 8px;
+  height: 8px;
+  animation-delay: 0.6s;
+}
+
+@keyframes c2a-bridge-dot {
+  0%, 100% {
+    opacity: 0.7;
+    box-shadow:
+      0 0 6px rgba(255, 20, 147, 0.9),
+      0 0 14px rgba(255, 20, 147, 0.4);
+  }
+  50% {
+    opacity: 1;
+    box-shadow:
+      0 0 12px rgba(255, 20, 147, 1),
+      0 0 26px rgba(255, 20, 147, 0.7);
+  }
+}
+
+/* Category list */
+.c2a-bridge__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.c2a-bridge__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  /* Dark-white — brighter than before, still muted */
+  color: rgba(216, 216, 226, 0.85);
+  transition: color 0.35s ease;
+}
+
+.c2a-bridge__item:hover {
+  color: #ffffff;
+}
+
+.c2a-bridge__item:hover .c2a-bridge__bullet {
+  box-shadow:
+    0 0 12px rgba(255, 20, 147, 1),
+    0 0 24px rgba(255, 20, 147, 0.6);
+  transform: scale(1.3);
+}
+
+/* The tiny pink bullet that pulses in sequence */
+.c2a-bridge__bullet {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ff1493;
+  box-shadow: 0 0 8px rgba(255, 20, 147, 0.75);
+  animation: c2a-bridge-bullet 2.2s ease-in-out infinite;
+  /* Stagger each bullet by its index */
+  animation-delay: calc(var(--i, 0) * 0.45s);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+@keyframes c2a-bridge-bullet {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.c2a-bridge__label {
+  white-space: nowrap;
+}
+
+/* Bottom tagline */
+.c2a-bridge__tagline {
+  margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  /* Dark-white but still subtle */
+  color: rgba(200, 200, 214, 0.5);
+  text-align: center;
+  line-height: 1.7;
+  text-transform: uppercase;
+}
+
+/* Mobile: shorter, horizontal, no lines */
+@media (max-width: 1023px) {
+  .c2a-bridge {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 12px 22px;
+    padding: 4px 0;
+  }
+
+  .c2a-bridge__list {
+    flex-direction: row;
+    gap: 18px;
+  }
+
+  .c2a-bridge__tagline {
+    margin: 0;
+    font-size: 8px;
+    opacity: 0.75;
+  }
+
+  .c2a-bridge__tagline br {
+    display: none;
+  }
+}
