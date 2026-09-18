@@ -147,11 +147,10 @@ export default function Hero({ ready }: { ready: boolean }) {
 
   /* ---------------------------------------------------------------- */
 
-  return (
-    <section
+  return (    <section
       id="home"
       ref={sectionRef}
-      className="relative flex min-h-[100svh] overflow-hidden bg-[var(--color-void)] lg:min-h-[130svh]"
+      className="relative flex min-h-[100svh] overflow-hidden bg-[var(--color-void)] lg:min-h-screen"
     >
       <div
         ref={glowRef}
@@ -162,14 +161,14 @@ export default function Hero({ ready }: { ready: boolean }) {
         }}
       />
 
-      <div className="container-page relative z-10 grid w-full grid-cols-1 gap-10 py-20 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.05fr)] lg:gap-8 lg:py-0">
+      <div className="container-page relative z-10 grid w-full grid-cols-1 gap-10 py-16 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.05fr)] lg:gap-8 lg:py-0">
 
         {/* ============================================================ */}
         {/* LEFT — copy                                                   */}
         {/* ============================================================ */}
         <div
           ref={contentRef}
-          className="relative flex flex-col justify-center will-change-transform lg:self-start lg:pt-[20vh]"
+          className="relative flex flex-col justify-center will-change-transform lg:self-start lg:pt-[15vh]"
         >
           <div
             ref={eyebrowRef}
@@ -232,7 +231,7 @@ export default function Hero({ ready }: { ready: boolean }) {
         {/* ============================================================ */}
         <div
           ref={bridgeRef}
-         className="c2a-bridge relative opacity-0 lg:self-start lg:pt-[20vh]"
+          className="c2a-bridge relative opacity-0 lg:self-start lg:pt-[15vh]"
         >
           {/* Top connector line with animated shimmer */}
           <span className="c2a-bridge__line hidden lg:block" />
@@ -273,7 +272,7 @@ export default function Hero({ ready }: { ready: boolean }) {
         {/* ============================================================ */}
         <div
           ref={sceneWrapRef}
-          className="c2a-hero__scene relative h-[70vh] min-h-[420px] w-full lg:h-[100vh] lg:min-h-[700px] lg:self-center"
+          className="c2a-hero__scene relative h-[65vh] min-h-[400px] w-full lg:h-[85vh] lg:min-h-[550px] lg:self-center"
         >
           <div ref={sceneInnerRef} className="h-full w-full opacity-0">
             <Suspense fallback={null}>

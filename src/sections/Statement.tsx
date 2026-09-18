@@ -17,7 +17,7 @@ export default function Statement() {
       const st = ScrollTrigger.create({
         trigger: wrap,
         start: 'top top',
-        end: '+=180%',
+        end: '+=100%',
         scrub: 0.4,
         pin: true,
         onUpdate: (self) => {
@@ -28,25 +28,26 @@ export default function Statement() {
       gsap.to(rowARef.current, {
         xPercent: -14,
         ease: 'none',
-        scrollTrigger: { trigger: wrap, start: 'top top', end: '+=180%', scrub: 0.4 },
+        scrollTrigger: { trigger: wrap, start: 'top top', end: '+=100%', scrub: 0.4 },
       });
       gsap.to(rowBRef.current, {
         xPercent: 10,
         ease: 'none',
-        scrollTrigger: { trigger: wrap, start: 'top top', end: '+=180%', scrub: 0.4 },
+        scrollTrigger: { trigger: wrap, start: 'top top', end: '+=100%', scrub: 0.4 },
       });
       gsap.to(rowCRef.current, {
         xPercent: -8,
         ease: 'none',
-        scrollTrigger: { trigger: wrap, start: 'top top', end: '+=180%', scrub: 0.4 },
+        scrollTrigger: { trigger: wrap, start: 'top top', end: '+=100%', scrub: 0.4 },
       });
       gsap.fromTo(
         captionRef.current,
-        { opacity: 0 },
+        { opacity: 0.5, y: 15 },
         {
           opacity: 1,
+          y: 0,
           ease: 'none',
-          scrollTrigger: { trigger: wrap, start: 'top top', end: '+=90%', scrub: 0.4 },
+          scrollTrigger: { trigger: wrap, start: 'top 85%', end: 'top 30%', scrub: 0.4 },
         }
       );
 

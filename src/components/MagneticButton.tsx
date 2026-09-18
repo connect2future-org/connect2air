@@ -33,17 +33,19 @@ export default function MagneticButton({
     gsap.to(ref.current, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.4)' });
   };
 
+  const Component = Tag as any;
+
   return (
-    <Tag
+    <Component
       ref={ref}
       onPointerMove={onMove}
       onPointerLeave={onLeave}
       data-cursor="cta"
       data-cursor-label={cursorLabel}
       className={className}
-      {...(rest as ComponentPropsWithoutRef<'button'>)}
+      {...rest}
     >
       {children}
-    </Tag>
+    </Component>
   );
 }
