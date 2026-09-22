@@ -47,10 +47,30 @@ export interface MediaItem {
   createdAt: string;
 }
 
+export interface DroneSpec {
+  label: string;
+  value: string;
+}
+
+export interface DroneItem {
+  id: string;
+  _id?: string;
+  name: string;
+  tagline?: string;
+  badge?: string;
+  price: string;
+  imageUrl?: string;
+  description?: string;
+  specs?: DroneSpec[];
+  featured?: boolean;
+  createdAt?: string;
+}
+
 const STORAGE_KEYS = {
   SERVICES: 'c2a_cms_services',
   PRICING: 'c2a_cms_pricing',
   ENQUIRIES: 'c2a_cms_enquiries',
+  DRONES: 'c2a_cms_drones',
 };
 
 const DEFAULT_PRICING: PricingItem[] = [
@@ -457,5 +477,159 @@ export const deleteCMSEnquiry = (id: string) => {
   notifyCMSUpdate();
   return filtered;
 };
+
+// ── DRONES & PRODUCTS STORE ──────────────────────────────────────────────────
+const DEFAULT_DRONES: DroneItem[] = [
+  {
+    id: 'd1',
+    name: 'C2A Swarm-Master 2.0',
+    tagline: 'Industry Standard Light-Show & Ad Drone',
+    badge: 'Popular Swarm',
+    price: '₹2.8 Lakhs',
+    imageUrl: '',
+    description: 'Precision quadcopter engineered for synchronized swarms, high-density LED integration, and wind resistance up to 38 km/h.',
+    specs: [
+      { label: 'Flight Time', value: '28 Mins' },
+      { label: 'Payload Capacity', value: '2.5 kg' },
+      { label: 'Positioning', value: 'Dual RTK GPS' },
+      { label: 'Wind Resistance', value: '38 km/h' },
+    ],
+    featured: false,
+  },
+  {
+    id: 'd2',
+    name: 'C2A Mega-Screen 4K',
+    tagline: 'High-Lumen Floating LED Matrix Screen Drone',
+    badge: 'Bestseller',
+    price: '₹4.5 Lakhs',
+    imageUrl: '',
+    description: 'High-resolution aerial video screen display drone with 10,000 Nits brightness and daylight-visible outdoor playback.',
+    specs: [
+      { label: 'Flight Time', value: '25 Mins' },
+      { label: 'Brightness', value: '10,000 Nits' },
+      { label: 'Screen Tech', value: 'Full Color LED Matrix' },
+      { label: 'Weather Rating', value: 'IP65 Waterproof' },
+    ],
+    featured: true,
+  },
+  {
+    id: 'd3',
+    name: 'C2A Micro-Swarm Lite',
+    tagline: 'Compact Event & Indoor Arena Display Drone',
+    badge: 'Indoor & Arena',
+    price: '₹1.5 Lakhs',
+    imageUrl: '',
+    description: 'Ultra-agile swarm drone ideal for indoor arena light shows, mall product launches, and compact venue display formations.',
+    specs: [
+      { label: 'Flight Time', value: '20 Mins' },
+      { label: 'Payload Capacity', value: '1.0 kg' },
+      { label: 'Usage Area', value: 'Indoor & Covered Venues' },
+      { label: 'Agility', value: 'High Precision Swarm' },
+    ],
+    featured: false,
+  },
+];
+
+export const getCMSDrones = (): DroneItem[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.DRONES);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return DEFAULT_DRONES;
+};
+
+export const saveCMSDrones = (items: DroneItem[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.DRONES, JSON.stringify(items));
+  } catch (err) {
+    console.warn('LocalStorage quota limit reached, caching trimmed list:', err);
+    try {
+      const lightweight = items.map((item) => ({
+        ...item,
+        imageUrl: item.imageUrl && item.imageUrl.length > 50000 ? '' : item.imageUrl,
+      }));
+      localStorage.setItem(STORAGE_KEYS.DRONES, JSON.stringify(lightweight));
+    } catch (e) {
+      console.error('Failed to write to localStorage:', e);
+    }
+  }
+  notifyCMSUpdate();
+};
+
+export async function getCMSDronesAsync(): Promise<DroneItem[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/drones`);
+    const json = await parseJsonResponse(res);
+    if (res.ok && json.success && Array.isArray(json.data)) {
+      const formatted: DroneItem[] = json.data.map((raw: any) => ({
+        id: raw._id || raw.id,
+        _id: raw._id,
+        name: raw.name,
+        tagline: raw.tagline || '',
+        badge: raw.badge || '',
+        price: raw.price,
+        imageUrl: raw.imageUrl || '',
+        description: raw.description || '',
+        specs: Array.isArray(raw.specs) ? raw.specs : [],
+        featured: Boolean(raw.featured),
+        createdAt: raw.createdAt,
+      }));
+      saveCMSDrones(formatted);
+      return formatted;
+    }
+  } catch (e) {}
+  return getCMSDrones();
+}
+
+export async function addCMSDroneAsync(drone: Omit<DroneItem, 'id'>): Promise<DroneItem> {
+  try {
+    const res = await fetch(`${API_BASE}/api/drones`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(drone),
+    });
+    const json = await parseJsonResponse(res);
+    if (res.ok && json.success) {
+      notifyCMSUpdate();
+      return { id: json.data._id, _id: json.data._id, ...json.data };
+    }
+  } catch (e) {}
+  const list = getCMSDrones();
+  const newItem: DroneItem = { id: `d_${Date.now()}`, ...drone };
+  saveCMSDrones([newItem, ...list]);
+  return newItem;
+}
+
+export async function updateCMSDroneAsync(id: string, droneData: Partial<DroneItem>): Promise<void> {
+  try {
+    const res = await fetch(`${API_BASE}/api/drones/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(droneData),
+    });
+    await parseJsonResponse(res);
+    notifyCMSUpdate();
+  } catch (e) {
+    const list = getCMSDrones();
+    const updated = list.map((item) => (item.id === id ? { ...item, ...droneData } : item));
+    saveCMSDrones(updated);
+  }
+}
+
+export async function deleteCMSDroneAsync(id: string): Promise<void> {
+  try {
+    const res = await fetch(`${API_BASE}/api/drones/${id}`, { method: 'DELETE' });
+    await parseJsonResponse(res);
+    notifyCMSUpdate();
+  } catch (e) {
+    const list = getCMSDrones();
+    const filtered = list.filter((item) => item.id !== id);
+    saveCMSDrones(filtered);
+  }
+}
+
 
 

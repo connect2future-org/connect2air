@@ -14,10 +14,16 @@ import {
   uploadCMSMedia,
   updateCMSMediaMeta,
   deleteCMSMediaItem,
+  getCMSDronesAsync,
+  addCMSDroneAsync,
+  updateCMSDroneAsync,
+  deleteCMSDroneAsync,
   type EnquiryItem,
   type ServiceItem,
   type PricingItem,
   type MediaItem,
+  type DroneItem,
+  type DroneSpec,
 } from '@/utils/cmsStorage';
 import { getApiBaseUrl } from '@/utils/apiBase';
 import { brand } from '@/data/siteData';
@@ -27,7 +33,36 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState(false);
-  const [activeTab, setActiveTab] = useState<'enquiries' | 'media' | 'services' | 'pricing'>('enquiries');
+  const [activeTab, setActiveTab] = useState<'drones' | 'enquiries' | 'media' | 'services' | 'pricing'>('drones');
+
+  // Drones CMS State
+  const [drones, setDrones] = useState<DroneItem[]>([]);
+  const [editingDrone, setEditingDrone] = useState<DroneItem | null>(null);
+  const [droneImageFile, setDroneImageFile] = useState<File | null>(null);
+  const droneFileInputRef = useRef<HTMLInputElement>(null);
+  const [droneForm, setDroneForm] = useState<{
+    name: string;
+    tagline: string;
+    badge: string;
+    price: string;
+    imageUrl: string;
+    description: string;
+    featured: boolean;
+    specs: DroneSpec[];
+  }>({
+    name: '',
+    tagline: '',
+    badge: '',
+    price: '',
+    imageUrl: '',
+    description: '',
+    featured: false,
+    specs: [
+      { label: 'Flight Time', value: '28 Mins' },
+      { label: 'Payload Capacity', value: '2.5 kg' },
+      { label: 'Positioning', value: 'Dual RTK GPS' },
+    ],
+  });
 
   // Enquiries state
   const [enquiries, setEnquiries] = useState<EnquiryItem[]>([]);
@@ -152,6 +187,153 @@ export default function AdminPage() {
     // 4. Media Reel (Cloudinary / MongoDB)
     const mediaItems = await getCMSMediaAsync();
     setMediaList(mediaItems);
+
+    // 5. Drone Products (MongoDB Atlas / Local fallback)
+    const droneItems = await getCMSDronesAsync();
+    setDrones(droneItems);
+  };
+
+  // Drone Products Actions
+  const handleSaveDrone = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!droneForm.name || !droneForm.price) {
+      alert('Please fill out Model Name and Price.');
+      return;
+    }
+    try {
+      if (editingDrone) {
+        await updateCMSDroneAsync(editingDrone.id, droneForm);
+        showToast('Drone card updated successfully.');
+      } else {
+        await addCMSDroneAsync(droneForm);
+        showToast('New Drone product card created.');
+      }
+      setEditingDrone(null);
+      setDroneForm({
+        name: '',
+        tagline: '',
+        badge: '',
+        price: '',
+        imageUrl: '',
+        description: '',
+        featured: false,
+        specs: [
+          { label: 'Flight Time', value: '28 Mins' },
+          { label: 'Payload Capacity', value: '2.5 kg' },
+          { label: 'Positioning', value: 'Dual RTK GPS' },
+        ],
+      });
+      setDroneImageFile(null);
+      if (droneFileInputRef.current) droneFileInputRef.current.value = '';
+      refreshData();
+    } catch (err: any) {
+      alert(`Error saving drone product: ${err?.message || 'Unknown error'}`);
+    }
+  };
+
+  const handleEditDrone = (drone: DroneItem) => {
+    setEditingDrone(drone);
+    setDroneForm({
+      name: drone.name || '',
+      tagline: drone.tagline || '',
+      badge: drone.badge || '',
+      price: drone.price || '',
+      imageUrl: drone.imageUrl || '',
+      description: drone.description || '',
+      featured: !!drone.featured,
+      specs: drone.specs && drone.specs.length > 0 ? drone.specs : [
+        { label: 'Flight Time', value: '28 Mins' },
+        { label: 'Payload Capacity', value: '2.5 kg' },
+      ],
+    });
+    window.scrollTo({ top: 300, behavior: 'smooth' });
+  };
+
+  const handleDeleteDrone = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this drone product card?')) return;
+    try {
+      await deleteCMSDroneAsync(id);
+      refreshData();
+      showToast('Drone product card deleted.');
+    } catch (err: any) {
+      alert(`Delete failed: ${err?.message || 'Unknown error'}`);
+    }
+  };
+
+  const handleDroneImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      alert('Image size is too large (max 20MB).');
+      e.target.value = '';
+      return;
+    }
+
+    setDroneImageFile(file);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const rawDataUrl = event.target?.result as string;
+      const img = new Image();
+      img.src = rawDataUrl;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1000;
+        const MAX_HEIGHT = 1000;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          setDroneForm((prev) => ({ ...prev, imageUrl: compressedBase64 }));
+        } else {
+          setDroneForm((prev) => ({ ...prev, imageUrl: rawDataUrl }));
+        }
+      };
+      img.onerror = () => {
+        setDroneForm((prev) => ({ ...prev, imageUrl: rawDataUrl }));
+      };
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddSpec = () => {
+    setDroneForm((prev) => ({
+      ...prev,
+      specs: [...prev.specs, { label: '', value: '' }],
+    }));
+  };
+
+  const handleRemoveSpec = (index: number) => {
+    setDroneForm((prev) => ({
+      ...prev,
+      specs: prev.specs.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleSpecChange = (index: number, field: 'label' | 'value', val: string) => {
+    setDroneForm((prev) => {
+      const newSpecs = [...prev.specs];
+      newSpecs[index] = { ...newSpecs[index], [field]: val };
+      return { ...prev, specs: newSpecs };
+    });
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -508,6 +690,18 @@ export default function AdminPage() {
         <div className="flex items-center justify-between gap-3 border-b border-pink-500/20 pb-3 mb-6 sm:mb-8 overflow-x-auto no-scrollbar scrollbar-none">
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
+              onClick={() => setActiveTab('drones')}
+              className={`px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 ${
+                activeTab === 'drones'
+                  ? 'bg-pink-500 text-white shadow-[0_0_15px_rgba(255,20,147,0.4)]'
+                  : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <span>🚁 Drone Products</span>
+              <span className="bg-black/30 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px]">{drones.length}</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('enquiries')}
               className={`px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 ${
                 activeTab === 'enquiries'
@@ -564,6 +758,326 @@ export default function AdminPage() {
             <span>🔄 Refresh Sync</span>
           </button>
         </div>
+
+        {/* ── TAB 0: DRONE PRODUCTS CMS ──────────────────────── */}
+        {activeTab === 'drones' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+            {/* Form Column */}
+            <div className="lg:col-span-5 bg-[#16060c] border border-pink-500/30 rounded-2xl p-5 sm:p-6 shadow-xl h-fit">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+                <h3 className="font-display text-lg font-black uppercase text-white tracking-wide">
+                  {editingDrone ? '✏️ Edit Drone Model' : '🛸 Add New Drone Product'}
+                </h3>
+                {editingDrone && (
+                  <button
+                    onClick={() => {
+                      setEditingDrone(null);
+                      setDroneForm({
+                        name: '',
+                        tagline: '',
+                        badge: '',
+                        price: '',
+                        imageUrl: '',
+                        description: '',
+                        featured: false,
+                        specs: [
+                          { label: 'Flight Time', value: '28 Mins' },
+                          { label: 'Payload Capacity', value: '2.5 kg' },
+                        ],
+                      });
+                    }}
+                    className="text-xs text-pink-300 font-mono underline hover:text-white"
+                  >
+                    + Reset Form
+                  </button>
+                )}
+              </div>
+
+              <form onSubmit={handleSaveDrone} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-pink-200 mb-1">
+                    Drone Model Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. C2A Swarm-Master Pro 2.0"
+                    value={droneForm.name}
+                    onChange={(e) => setDroneForm({ ...droneForm, name: e.target.value })}
+                    className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs sm:text-sm focus:outline-none focus:border-pink-400"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-pink-200 mb-1">
+                      Price Tag *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. ₹2.8 Lakhs"
+                      value={droneForm.price}
+                      onChange={(e) => setDroneForm({ ...droneForm, price: e.target.value })}
+                      className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs sm:text-sm focus:outline-none focus:border-pink-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-pink-200 mb-1">
+                      Badge Tag
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Bestseller / Popular Swarm"
+                      value={droneForm.badge}
+                      onChange={(e) => setDroneForm({ ...droneForm, badge: e.target.value })}
+                      className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs sm:text-sm focus:outline-none focus:border-pink-400"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-pink-200 mb-1">
+                    Tagline / Short Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Industry Standard Light-Show & Ad Drone"
+                    value={droneForm.tagline}
+                    onChange={(e) => setDroneForm({ ...droneForm, tagline: e.target.value })}
+                    className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs sm:text-sm focus:outline-none focus:border-pink-400"
+                  />
+                </div>
+
+                {/* Image Upload / URL */}
+                <div>
+                  <label className="block text-xs font-semibold text-pink-200 mb-1">
+                    Product Image (Upload File or Enter URL)
+                  </label>
+                  <div className="space-y-2">
+                    <input
+                      ref={droneFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleDroneImageUpload}
+                      className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3 py-2 text-xs text-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-pink-500 file:text-white file:font-bold file:text-xs hover:file:bg-pink-400"
+                    />
+                    <div className="text-center font-mono text-[10px] text-white/40">— OR ENTER DIRECT URL —</div>
+                    <input
+                      type="url"
+                      placeholder="https://images.unsplash.com/photo-..."
+                      value={droneForm.imageUrl}
+                      onChange={(e) => setDroneForm({ ...droneForm, imageUrl: e.target.value })}
+                      className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-pink-400"
+                    />
+                  </div>
+                  {droneForm.imageUrl && (
+                    <div className="mt-2.5 relative rounded-xl border border-pink-500/30 overflow-hidden h-32 bg-black/40 flex items-center justify-center">
+                      <img src={droneForm.imageUrl} alt="Preview" className="h-full w-full object-contain" />
+                      <button
+                        type="button"
+                        onClick={() => setDroneForm({ ...droneForm, imageUrl: '' })}
+                        className="absolute top-2 right-2 px-2 py-0.5 bg-red-500/80 text-white rounded text-[10px] font-mono font-bold"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-pink-200 mb-1">Description</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Full product highlights & specs description..."
+                    value={droneForm.description}
+                    onChange={(e) => setDroneForm({ ...droneForm, description: e.target.value })}
+                    className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs sm:text-sm focus:outline-none focus:border-pink-400 resize-none"
+                  />
+                </div>
+
+                {/* Dynamic Specifications */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-semibold text-pink-200">
+                      Technical Specifications & Features
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleAddSpec}
+                      className="text-[11px] font-mono font-bold text-pink-300 bg-pink-500/20 px-2.5 py-1 rounded-lg border border-pink-500/30 hover:bg-pink-500/40"
+                    >
+                      + Add Spec
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {droneForm.specs.map((spec, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          placeholder="Feature (e.g. Flight Time)"
+                          value={spec.label}
+                          onChange={(e) => handleSpecChange(index, 'label', e.target.value)}
+                          className="flex-1 bg-white/5 border border-pink-500/30 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-pink-400"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Value (e.g. 28 Mins)"
+                          value={spec.value}
+                          onChange={(e) => handleSpecChange(index, 'value', e.target.value)}
+                          className="flex-1 bg-white/5 border border-pink-500/30 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-pink-400"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSpec(index)}
+                          className="p-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-300 rounded-lg text-xs font-mono"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Featured Toggle */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="droneFeatured"
+                    checked={droneForm.featured}
+                    onChange={(e) => setDroneForm({ ...droneForm, featured: e.target.checked })}
+                    className="accent-pink-500 h-4 w-4 rounded cursor-pointer"
+                  />
+                  <label htmlFor="droneFeatured" className="text-xs text-white font-medium cursor-pointer">
+                    Highlight as Featured Product Card
+                  </label>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-pink-500 hover:bg-pink-400 font-bold text-xs sm:text-sm text-white rounded-xl shadow-[0_0_20px_rgba(255,20,147,0.4)] transition"
+                  >
+                    {editingDrone ? 'Update Drone Card' : '+ Save Drone Card'}
+                  </button>
+
+                  {editingDrone && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingDrone(null);
+                        setDroneForm({
+                          name: '',
+                          tagline: '',
+                          badge: '',
+                          price: '',
+                          imageUrl: '',
+                          description: '',
+                          featured: false,
+                          specs: [
+                            { label: 'Flight Time', value: '28 Mins' },
+                            { label: 'Payload Capacity', value: '2.5 kg' },
+                          ],
+                        });
+                      }}
+                      className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm rounded-xl transition"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Drone Cards Display List */}
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 h-fit">
+              {drones.length === 0 ? (
+                <div className="col-span-full text-center py-12 bg-[#16060c] rounded-2xl border border-white/10">
+                  <div className="text-3xl mb-2">🛸</div>
+                  <h4 className="font-bold text-white">No Drone Products Yet</h4>
+                  <p className="text-xs text-white/60 mt-1">Use the form to create your first drone card!</p>
+                </div>
+              ) : (
+                drones.map((drone) => (
+                  <div
+                    key={drone.id}
+                    className={`bg-[#16060c] border rounded-2xl p-5 flex flex-col justify-between transition shadow-md relative overflow-hidden ${
+                      drone.featured
+                        ? 'border-pink-500 shadow-[0_0_20px_rgba(255,20,147,0.25)]'
+                        : 'border-pink-500/30 hover:border-pink-400'
+                    }`}
+                  >
+                    {/* Top Badges & Actions */}
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span className="font-mono text-[10px] font-bold text-pink-300 bg-pink-500/20 px-2.5 py-0.5 rounded-full border border-pink-400/30">
+                          {drone.badge || 'Commercial Drone'}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleEditDrone(drone)}
+                            className="px-2.5 py-1 bg-pink-500/20 hover:bg-pink-500/40 text-pink-300 rounded text-xs font-mono font-bold transition"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteDrone(drone.id)}
+                            className="px-2.5 py-1 bg-red-500/20 hover:bg-red-500/40 text-red-300 rounded text-xs font-mono font-bold transition"
+                          >
+                            Del
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Image Preview */}
+                      {drone.imageUrl && (
+                        <div className="mb-3 rounded-xl overflow-hidden h-36 bg-black/40 border border-white/10">
+                          <img src={drone.imageUrl} alt={drone.name} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+
+                      <h4 className="font-display text-lg font-black uppercase text-white">
+                        {drone.name}
+                      </h4>
+                      {drone.tagline && (
+                        <p className="text-xs text-white/70 font-mono mt-0.5">{drone.tagline}</p>
+                      )}
+
+                      <div className="font-display text-2xl font-black text-pink-400 mt-2">
+                        {drone.price}
+                      </div>
+
+                      {/* Specs snippet */}
+                      {drone.specs && drone.specs.length > 0 && (
+                        <div className="mt-3 space-y-1.5">
+                          {drone.specs.map((s, idx) => (
+                            <div key={idx} className="flex justify-between text-[11px] bg-white/5 px-2.5 py-1 rounded border border-white/5">
+                              <span className="text-white/60 font-mono">{s.label}</span>
+                              <span className="text-white font-bold font-mono">{s.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {drone.description && (
+                        <p className="text-xs text-white/70 mt-3 line-clamp-2 leading-relaxed">
+                          {drone.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {drone.featured && (
+                      <div className="mt-3 pt-2 border-t border-pink-500/30 text-[10px] font-mono text-pink-300 uppercase font-bold flex items-center gap-1">
+                        <span>★ Featured Highlight Product</span>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ── TAB 1: ENQUIRIES / FORM SUBMISSIONS ──────────────────────── */}
         {activeTab === 'enquiries' && (

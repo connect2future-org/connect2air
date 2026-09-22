@@ -72,7 +72,7 @@ export const ContactModal: React.FC = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-opacity duration-300 animate-fadeIn">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-opacity duration-300 animate-fadeIn">
       {/* Modal Content Box */}
       <div 
         className="relative w-full max-w-lg bg-gradient-to-b from-[#1c0811] to-[#0a0305] border border-rose-500/40 rounded-2xl p-6 sm:p-8 shadow-[0_0_50px_rgba(255,42,85,0.25)] transition-all duration-300 transform scale-100"

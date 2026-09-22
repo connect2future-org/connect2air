@@ -12,6 +12,7 @@ import Hero from '@/sections/Hero';
 import Statement from '@/sections/Statement';
 import About from '@/sections/About';
 import Services from '@/sections/Services';
+import Franchise from '@/sections/Franchise';
 import Process from '@/sections/Process';
 import Campaigns from '@/sections/Campaigns';
 import Showreel from '@/sections/Showreel';
@@ -60,6 +61,7 @@ export default function App() {
         <Statement />
         <About />
         <Services />
+        <Franchise />
         <Process />
         <Campaigns />
         <Showreel />

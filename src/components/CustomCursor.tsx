@@ -48,7 +48,7 @@ export default function CustomCursor() {
       if (el) {
         setState((el.dataset.cursor as 'hover' | 'cta' | 'explore') || 'hover');
         if (labelRef.current) labelRef.current.textContent = el.dataset.cursorLabel ?? '';
-      } else if (target.closest('a,button')) {
+      } else if (target.closest('a,button,input,textarea,select,label')) {
         setState('hover');
         if (labelRef.current) labelRef.current.textContent = '';
       } else {
@@ -69,7 +69,7 @@ export default function CustomCursor() {
   if (isTouch) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[200] hidden md:block">
+    <div className="pointer-events-none fixed inset-0 z-[9999] hidden md:block">
       <div
         ref={dotRef}
         className="fixed left-0 top-0 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white will-change-transform"
