@@ -18,7 +18,10 @@ async function uploadBase64ToCloudinary(base64Str) {
   try {
     const res = await cloudinary.uploader.upload(base64Str, {
       folder: 'connect2air/drones',
-      transformation: [{ width: 1200, crop: 'limit' }, { quality: 'auto', fetch_format: 'auto' }],
+      transformation: [
+        { width: 800, height: 800, crop: 'fill', gravity: 'auto' },
+        { quality: 'auto', fetch_format: 'auto' },
+      ],
     });
     return res.secure_url;
   } catch (err) {

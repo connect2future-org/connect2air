@@ -150,8 +150,8 @@ export default function Franchise() {
                     : 'border-rose-500/30 hover:border-pink-400'
                 }`}
               >
-                {/* Fixed Height Uniform Image Header */}
-                <div className="w-full h-52 bg-black/60 border-b border-white/10 relative overflow-hidden shrink-0 group">
+                {/* 1:1 Square Ratio Image Header */}
+                <div className="w-full aspect-square bg-black/60 border-b border-white/10 relative overflow-hidden shrink-0 group">
                   <img
                     src={displayImg}
                     alt={drone.name}

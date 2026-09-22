@@ -279,29 +279,19 @@ export default function AdminPage() {
       img.src = rawDataUrl;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1000;
-        const MAX_HEIGHT = 1000;
-        let width = img.width;
-        let height = img.height;
+        const SQUARE_SIZE = 800; // 1:1 Square Ratio
+        canvas.width = SQUARE_SIZE;
+        canvas.height = SQUARE_SIZE;
 
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          // Center crop 1:1 square
+          const minDim = Math.min(img.width, img.height);
+          const sx = (img.width - minDim) / 2;
+          const sy = (img.height - minDim) / 2;
+          ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, SQUARE_SIZE, SQUARE_SIZE);
+
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
           setDroneForm((prev) => ({ ...prev, imageUrl: compressedBase64 }));
         } else {
           setDroneForm((prev) => ({ ...prev, imageUrl: rawDataUrl }));
