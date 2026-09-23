@@ -231,7 +231,7 @@ export default function Hero({ ready }: { ready: boolean }) {
         {/* ============================================================ */}
         <div
           ref={bridgeRef}
-          className="c2a-bridge relative opacity-0 lg:self-start lg:pt-[15vh]"
+          className="c2a-bridge relative opacity-0 lg:self-center lg:pt-12"
         >
           {/* Top connector line with animated shimmer */}
           <span className="c2a-bridge__line hidden lg:block" />
