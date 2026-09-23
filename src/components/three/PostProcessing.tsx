@@ -1,4 +1,4 @@
-import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing';
+import { Bloom, EffectComposer } from '@react-three/postprocessing';
 
 interface PostProcessingProps {
   /** When false the composer is skipped entirely (low-power devices). */
@@ -7,8 +7,8 @@ interface PostProcessingProps {
 
 /**
  * Deliberately restrained post stack.
- * Bloom threshold is high enough that only the pink accents and the brightest
- * LED pixels bleed — the drone itself stays crisp.
+ * Vignette is removed so the 3D canvas blends 100% seamlessly into the page background
+ * without creating a separate square outline or mismatched border box.
  */
 export function PostProcessing({ enabled }: PostProcessingProps) {
   if (!enabled) return null;
@@ -16,13 +16,12 @@ export function PostProcessing({ enabled }: PostProcessingProps) {
   return (
     <EffectComposer multisampling={0}>
       <Bloom
-        intensity={0.62}
-        luminanceThreshold={0.62}
-        luminanceSmoothing={0.28}
+        intensity={0.25}
+        luminanceThreshold={0.82}
+        luminanceSmoothing={0.3}
         mipmapBlur
-        radius={0.7}
+        radius={0.5}
       />
-      <Vignette offset={0.3} darkness={0.66} />
     </EffectComposer>
   );
 }

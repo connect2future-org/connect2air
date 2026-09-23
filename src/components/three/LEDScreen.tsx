@@ -213,15 +213,14 @@ export function LEDScreen() {
     e.stopPropagation();
   };
 
-  /* Shared material configuration used by both faces. */
+  /* Shared material configuration used by both faces.
+   * Using MeshBasicMaterial with toneMapped={false} and a comfortable neutral tone (#d0d0d0)
+   * prevents 3D scene lights and tone mapping from blowing out white poster backgrounds.
+   * Uploaded poster text and graphics stay 100% crisp, rich, and perfectly legible. */
   const materialProps = {
     map: finalTexture,
-    emissiveMap: finalTexture,
-    emissive: '#ffffff' as const,
-    emissiveIntensity: hovered ? 0.62 : 0.38,
-    color: '#ffffff' as const,
-    metalness: 0.05,
-    roughness: 0.62,
+    color: '#d0d0d0' as const,
+    toneMapped: false,
     side: THREE.FrontSide,
   };
 
@@ -240,7 +239,7 @@ export function LEDScreen() {
         onPointerDown={stopDomPointer}
         onClick={onClick}
       >
-        <meshStandardMaterial {...materialProps} />
+        <meshBasicMaterial {...materialProps} />
       </mesh>
 
       {/* ============================================================ */}
@@ -255,7 +254,7 @@ export function LEDScreen() {
         onPointerDown={stopDomPointer}
         onClick={onClick}
       >
-        <meshStandardMaterial {...materialProps} />
+        <meshBasicMaterial {...materialProps} />
       </mesh>
 
       {/* ============================================================ */}

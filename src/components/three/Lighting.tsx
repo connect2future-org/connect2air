@@ -43,11 +43,11 @@ export function Lighting() {
         color={BRAND.pink}
       />
 
-      {/* Local pink bounce that hugs the screen. */}
+      {/* Subtle local accent light near the drone legs. */}
       <pointLight
-        position={[0, -1.8, 1.9]}
-        intensity={1.6}
-        distance={8}
+        position={[0, -1.8, 2.5]}
+        intensity={0.4}
+        distance={6}
         decay={2}
         color={BRAND.pinkSoft}
       />
