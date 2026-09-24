@@ -152,12 +152,70 @@ export async function getCMSMediaAsync(): Promise<MediaItem[]> {
   }
 }
 
-// POST — upload file (FormData) or save URL-only entry
+// POST — upload file (Direct to Cloudinary from browser if possible to prevent 413 Payload Too Large on production proxies)
 export async function uploadCMSMedia(formData: FormData): Promise<MediaItem | null> {
   try {
+    const file = formData.get('file') as File | null;
+
+    if (file && file.size > 0) {
+      try {
+        // 1. Get signed upload parameters from backend API
+        const sigRes = await fetch(`${API_BASE}/api/media/signature`);
+        if (sigRes.ok) {
+          const sigJson = await sigRes.json();
+          if (sigJson.success && sigJson.data) {
+            const { signature, timestamp, cloudName, apiKey, folder } = sigJson.data;
+
+            // 2. Upload file directly from browser to Cloudinary
+            const cloudData = new FormData();
+            cloudData.append('file', file);
+            cloudData.append('api_key', apiKey);
+            cloudData.append('timestamp', String(timestamp));
+            cloudData.append('signature', signature);
+            cloudData.append('folder', folder);
+
+            const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+              method: 'POST',
+              body: cloudData,
+            });
+
+            if (cloudRes.ok) {
+              const cloudJson = await cloudRes.json();
+              if (cloudJson.secure_url) {
+                // 3. Send lightweight JSON payload to backend (prevents 413 Payload Too Large error on deployed proxies)
+                const payload = {
+                  title: formData.get('title'),
+                  tagline: formData.get('tagline'),
+                  description: formData.get('description'),
+                  type: formData.get('type') || (file.type.startsWith('video/') ? 'video' : 'image'),
+                  size: formData.get('size') || 'reel',
+                  url: cloudJson.secure_url,
+                  cloudinaryId: cloudJson.public_id,
+                };
+
+                const res = await fetch(`${API_BASE}/api/media`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload),
+                });
+                const json = await parseJsonResponse(res);
+                if (res.ok && json.success) {
+                  notifyCMSUpdate();
+                  return normaliseMedia(json.data);
+                }
+              }
+            }
+          }
+        }
+      } catch (directErr) {
+        console.warn('Direct Cloudinary upload failed, falling back to backend upload:', directErr);
+      }
+    }
+
+    // Standard fallback: send formData to backend
     const res = await fetch(`${API_BASE}/api/media`, {
       method: 'POST',
-      body: formData, // multipart/form-data — do NOT set Content-Type manually
+      body: formData,
     });
     const json = await parseJsonResponse(res);
     if (!res.ok || !json.success) throw new Error(json.message || 'Upload failed');

@@ -55,37 +55,37 @@ export const services = [
   {
     number: '01',
     title: 'Drone LED advertising',
-    category: 'Core display',
+    category: 'Sky-High Brand Impact',
     description:
-      'A synchronised formation of LED-carrying drones renders your message as a floating, animated screen above any venue.',
+      'Flying LED-screen displays, brand campaigns, festival activations, and high-impact aerial light experiences rendered high above venue crowds.',
   },
   {
     number: '02',
-    title: 'Brand activations',
-    category: 'Experiential',
+    title: 'Aerial Photo & Video',
+    category: 'Perspectives Beyond Boundaries',
     description:
-      'Launch moments engineered for the sky — reveals, countdowns and logo formations built around your activation.',
+      'Stunning aerial photography, 4K videography, real-estate showcase, event coverage, and promotional brand content.',
   },
   {
     number: '03',
-    title: 'Event & concert displays',
-    category: 'Live entertainment',
+    title: 'Survey & Inspection',
+    category: 'Accuracy From Above',
     description:
-      'Synced to music and lighting cues, the display becomes part of the show rather than an interruption to it.',
+      'High-precision aerial mapping & GIS, construction progress tracking, thermal inspection, and specialist industrial payloads.',
   },
   {
     number: '04',
-    title: 'Product & store launches',
-    category: 'Retail',
+    title: 'Agriculture',
+    category: 'Smart Farming, Greater Growth',
     description:
-      'Announce a launch above the storefront or venue itself, visible long before anyone reaches the door.',
+      'Crop monitoring, precision spraying solutions, vegetation health mapping, and requirement-based agricultural deployment.',
   },
   {
     number: '05',
-    title: 'Custom aerial experiences',
-    category: 'Bespoke',
+    title: 'Drone Sales & Support',
+    category: 'End-to-End Assistance',
     description:
-      'Flight paths, formations and screen content designed from scratch around a brief that does not fit a template.',
+      'Commercial fleet sourcing, smart batteries & chargers, RC controllers, RTK base stations, spares, diagnostics, and repair support.',
   },
 ];
 

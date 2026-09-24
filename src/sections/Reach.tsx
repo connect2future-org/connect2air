@@ -23,7 +23,7 @@ export default function Reach() {
   const visibility = height > 130 ? 'Very high' : height > 90 ? 'High' : 'Moderate';
 
   return (
-    <section id="reach" className="relative bg-[var(--color-panel)] py-28 sm:py-36">
+    <section id="reach" className="relative bg-[var(--color-panel)] py-10 sm:py-20">
       <div className="container-page">
         <div className="mb-14 sm:mb-20">
           <div className="eyebrow mb-5">Reach</div>

@@ -41,6 +41,33 @@ function uploadToCloudinary(buffer, options) {
   });
 }
 
+// GET /api/media/signature — Generate signed parameters for direct browser-to-Cloudinary uploads
+router.get('/signature', (_req, res) => {
+  try {
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    const folder = 'connect2air/media';
+    const paramsToSign = { timestamp, folder };
+    const signature = cloudinary.utils.api_sign_request(
+      paramsToSign,
+      process.env.CLOUDINARY_API_SECRET
+    );
+
+    res.json({
+      success: true,
+      data: {
+        signature,
+        timestamp,
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        apiKey: process.env.CLOUDINARY_API_KEY,
+        folder,
+      },
+    });
+  } catch (err) {
+    console.error('Failed to generate Cloudinary signature:', err);
+    res.status(500).json({ success: false, message: 'Failed to generate upload signature.' });
+  }
+});
+
 // GET /api/media — List all media items (newest first)
 router.get('/', async (_req, res) => {
   try {

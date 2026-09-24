@@ -1,26 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { getCMSDronesAsync, type DroneItem } from '@/utils/cmsStorage';
+import FranchiseBrochureModal from '@/components/FranchiseBrochureModal';
 
 const DEFAULT_DRONES: DroneItem[] = [
   {
     id: 'd1',
-    name: 'C2A Swarm-Master 2.0',
-    tagline: 'Industry Standard Light-Show & Ad Drone',
-    badge: 'Popular Swarm',
-    price: '₹2.8 Lakhs',
+    name: 'DJI Matrice 350 RTK',
+    tagline: 'Flagship Enterprise Inspection & Mapping Drone',
+    badge: 'Enterprise',
+    price: '₹9.8 Lakhs',
+    featured: true,
     specs: [
-      { label: 'Flight Time', value: '28 Mins' },
-      { label: 'Payload Capacity', value: '2.5 kg' },
-      { label: 'Positioning', value: 'Dual RTK GPS' },
-      { label: 'Wind Resistance', value: '38 km/h' },
+      { label: 'Flight Time', value: '55 Mins' },
+      { label: 'Payload Capacity', value: '2.7 kg Dual/Triple' },
+      { label: 'IP Rating', value: 'IP55 Weatherproof' },
+      { label: 'Transmission', value: '20 km O3 Enterprise' },
     ],
   },
   {
     id: 'd2',
     name: 'C2A Mega-Screen 4K',
     tagline: 'High-Lumen Floating LED Matrix Screen Drone',
-    badge: 'Bestseller',
+    badge: 'Light-Show',
     price: '₹4.5 Lakhs',
     featured: true,
     specs: [
@@ -32,56 +34,92 @@ const DEFAULT_DRONES: DroneItem[] = [
   },
   {
     id: 'd3',
-    name: 'C2A Micro-Swarm Lite',
-    tagline: 'Compact Event & Indoor Arena Display Drone',
-    badge: 'Indoor & Arena',
-    price: '₹1.5 Lakhs',
+    name: 'DJI AGRAS T40',
+    tagline: 'Heavy Spraying & Spreading Agricultural Drone',
+    badge: 'Agricultural',
+    price: '₹12.5 Lakhs',
     specs: [
-      { label: 'Flight Time', value: '20 Mins' },
-      { label: 'Payload Capacity', value: '1.0 kg' },
-      { label: 'Usage Area', value: 'Indoor & Covered Venues' },
-      { label: 'Agility', value: 'High Precision Swarm' },
+      { label: 'Spray Tank', value: '40 Liter Capacity' },
+      { label: 'Spreading Tank', value: '50 kg Payload' },
+      { label: 'Radar', value: 'Active Phased Array' },
+      { label: 'Flow Rate', value: '12 L/min Atomized' },
+    ],
+  },
+  {
+    id: 'd4',
+    name: 'DJI Air 3S / Mini 5 Pro',
+    tagline: 'Consumer 4K Travel & Lifestyle Aerial Camera',
+    badge: 'Consumer',
+    price: '₹1.2 Lakhs',
+    specs: [
+      { label: 'Flight Time', value: '45 Mins' },
+      { label: 'Sensor', value: '1-inch CMOS 4K/60fps' },
+      { label: 'Weight', value: 'Sub-249g / Ultra-Light' },
+      { label: 'Sensing', value: 'Night-scape Omnidirectional' },
+    ],
+  },
+  {
+    id: 'd5',
+    name: 'C2A Bespoke Swarm Pro',
+    tagline: 'Customizable Swarm Drone & Payload Setup',
+    badge: 'Customizable',
+    price: 'Custom Quote',
+    featured: true,
+    specs: [
+      { label: 'Flight Time', value: '25-40 Mins (Custom)' },
+      { label: 'Payload Capacity', value: '1.0 - 10.0 kg' },
+      { label: 'Choreography', value: 'Tailored 3D Suite' },
+      { label: 'Screen Config', value: 'Bespoke LED Rig' },
     ],
   },
 ];
 
 const ACCESSORIES = [
   {
-    icon: '💡',
-    title: 'High-Lumen Ultra-Light LED Panel',
-    price: '₹65,000',
-    desc: '10,000 Nits high-brightness daylight visible screen payload with custom animation chip.',
+    icon: '🔋',
+    title: 'Intelligent Flight Batteries',
+    price: '₹35,000',
+    desc: 'High-density smart battery packs with self-heating and battery management system.',
   },
   {
-    icon: '🔋',
-    title: 'Multi-Battery Fast Charging Station',
-    price: '₹85,000',
-    desc: 'Rapid multi-charging dock station capable of refueling 12 drone batteries concurrently in 22 mins.',
+    icon: '⚡',
+    title: 'Fast Chargers & Charging Hubs',
+    price: '₹45,000',
+    desc: 'Multi-battery fast-charging stations capable of concurrent multi-dock refueling.',
   },
   {
     icon: '🎮',
-    title: 'Ground Control Station (GCS) + Software',
-    price: '₹1,20,000',
-    desc: 'Integrated flight control console loaded with Connect2Air 3D choreography suite & live telemetry.',
+    title: 'GCS & Remote Controllers',
+    price: '₹85,000',
+    desc: 'Integrated flight control console loaded with Connect2Air 3D choreography & live telemetry.',
+  },
+  {
+    icon: '🛰️',
+    title: 'RTK / PPK Base Stations',
+    price: '₹95,000',
+    desc: 'Centimeter-level precision RTK positioning towers for mapping, inspection, and light shows.',
   },
   {
     icon: '🪂',
-    title: 'Autonomous Parachute Safety System',
+    title: 'Autonomous Parachute & Safety Gear',
     price: '₹45,000',
-    desc: 'DGCA compliant automatic dual-deployment parachute system for fail-safe landing protection.',
+    desc: 'DGCA compliant dual-deployment automatic parachute systems and landing safety gear.',
   },
-];
-
-const INCLUDED_BENEFITS = [
-  '100% Direct Hardware Ownership — No rental room or space required',
-  'Ground Control Station (GCS) Software & 3D Choreography Suite Included',
-  'Complete Drone Pilot Flight Training & DGCA Certification Assistance',
-  '24×7 Technical Flight Engineer Support & Rapid Replacement Spares',
+  {
+    icon: '📷',
+    title: 'Gimbals, Thermal & RGB Payloads',
+    price: '₹1,15,000',
+    desc: 'Radiometric thermal cameras, optical zoom gimbals, and high-lumen LED payloads.',
+  },
 ];
 
 export default function Franchise() {
   const ref = useScrollReveal<HTMLDivElement>({ stagger: 0.08 });
   const [drones, setDrones] = useState<DroneItem[]>(DEFAULT_DRONES);
+  const [brochureModalOpen, setBrochureModalOpen] = useState(false);
+
+  const droneScrollRef = useRef<HTMLDivElement>(null);
+  const accScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadDrones = async () => {
@@ -97,8 +135,14 @@ export default function Franchise() {
     return () => window.removeEventListener('c2a_cms_updated', handleCMSUpdate);
   }, []);
 
+  const scrollContainer = (refObj: React.RefObject<HTMLDivElement | null>, direction: 'left' | 'right') => {
+    if (!refObj.current) return;
+    const scrollAmount = direction === 'left' ? -340 : 340;
+    refObj.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  };
+
   return (
-    <section id="franchise" className="relative bg-[var(--color-void)] py-12 sm:py-20 border-t border-rose-500/20 scroll-mt-20 overflow-hidden">
+    <section id="franchise" className="relative bg-[var(--color-void)] py-10 sm:py-16 border-t border-rose-500/20 scroll-mt-24 overflow-hidden">
       {/* Background Glow Orbs */}
       <div className="pointer-events-none absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-pink-500/10 blur-[130px]" />
       <div className="pointer-events-none absolute -right-32 bottom-10 h-96 w-96 rounded-full bg-rose-500/10 blur-[130px]" />
@@ -106,220 +150,231 @@ export default function Franchise() {
       <div className="container-page relative z-10">
         
         {/* ── Section Header ── */}
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
-          <div className="inline-flex items-center gap-2 rounded-full border border-pink-500/40 bg-pink-500/10 px-4 py-1.5 font-mono text-xs font-bold text-pink-300 uppercase tracking-widest mb-4">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-pink-500/40 bg-pink-500/10 px-4 py-1.5 font-mono text-xs font-bold text-pink-300 uppercase tracking-widest mb-3">
             <span className="h-2 w-2 rounded-full bg-pink-400 animate-pulse" />
             Commercial Drones & Accessories Store
           </div>
 
-          {/* Main Title */}
-          <div className="bg-[#16060c] border border-rose-500/30 rounded-2xl p-4 sm:p-6 shadow-[0_0_30px_rgba(255,20,147,0.15)] mb-4 inline-block w-full">
-            <h2 className="font-display text-3xl sm:text-5xl font-black uppercase text-white tracking-tight leading-tight">
-              Buy <span className="text-[var(--color-signal-2)] text-glow">Commercial Light-Show Drones</span>
+          <div className="bg-[#16060c] border border-rose-500/30 rounded-2xl p-4 sm:p-5 shadow-[0_0_30px_rgba(255,20,147,0.15)] mb-3 inline-block w-full">
+            <h2 className="font-display text-2xl sm:text-4xl font-black uppercase text-white tracking-tight leading-tight">
+              Commercial <span className="text-[var(--color-signal-2)] text-glow">Drone Fleet Catalog</span>
             </h2>
           </div>
 
-          <p className="text-sm sm:text-base text-white/80 font-medium leading-relaxed bg-white/5 border border-white/10 rounded-xl px-5 py-3 backdrop-blur-md">
-            Directly purchase industrial LED display drones, flight choreography ground stations, battery fast chargers, and accessories. 100% direct hardware ownership with complete pilot training & DGCA airspace clearance support.
+          <p className="text-xs sm:text-sm text-white/80 font-medium leading-relaxed bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 backdrop-blur-md">
+            Directly purchase industrial LED display drones, ground control stations, fast chargers, and accessories with 100% direct hardware ownership & pilot training.
           </p>
         </div>
 
-        {/* ── Drone Models Catalog Grid ── */}
-        <div className="mb-6">
-          <h3 className="font-display text-xl sm:text-2xl font-black uppercase text-white text-center mb-6 tracking-wide">
-            Available Commercial Drone Models
-          </h3>
-        </div>
-
-        <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16 items-stretch">
-          {drones.map((drone, index) => {
-            const defaultImages = [
-              'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?auto=format&fit=crop&w=800&q=80',
-              'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=800&q=80',
-              'https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&w=800&q=80',
-            ];
-            const displayImg = drone.imageUrl || defaultImages[index % defaultImages.length];
-
-            return (
-              <div
-                key={drone.id || drone.name}
-                data-reveal
-                className={`relative rounded-3xl bg-[#16060c] border transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-xl h-full ${
-                  drone.featured
-                    ? 'border-pink-500 shadow-[0_0_35px_rgba(255,20,147,0.3)] md:-translate-y-2'
-                    : 'border-rose-500/30 hover:border-pink-400'
-                }`}
-              >
-                {/* 1:1 Square Ratio Image Header */}
-                <div className="w-full aspect-square bg-black/60 border-b border-white/10 relative overflow-hidden shrink-0 group">
-                  <img
-                    src={displayImg}
-                    alt={drone.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#16060c] via-transparent to-transparent opacity-80" />
-                  {drone.featured && (
-                    <span className="absolute top-3 right-3 font-mono text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-pink-500 text-white shadow-[0_0_15px_rgba(255,20,147,0.8)] border border-pink-300">
-                      ★ Featured
-                    </span>
-                  )}
-                </div>
-
-                {/* Header Box with Min-Height for Horizontal Alignment */}
-                <div className={`p-5 text-center border-b flex flex-col justify-center min-h-[110px] shrink-0 ${
-                  drone.featured ? 'bg-gradient-to-r from-pink-600/30 to-rose-700/30 text-white' : 'bg-white/5 border-white/10'
-                }`}>
-                  {drone.badge && (
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/50 border border-white/20 inline-block mb-1.5 text-pink-300 w-max mx-auto">
-                      {drone.badge}
-                    </span>
-                  )}
-                  <h3 className="font-display text-lg sm:text-xl font-black uppercase text-white tracking-wide leading-snug">
-                    {drone.name}
-                  </h3>
-                  {drone.tagline && (
-                    <p className="text-[11px] text-white/75 mt-0.5 font-mono font-medium line-clamp-1">
-                      {drone.tagline}
-                    </p>
-                  )}
-                </div>
-
-                {/* Price, Specs & Description (Flex-1 for Equal Height Distribution) */}
-                <div className="p-6 space-y-4 text-center divide-y divide-white/10 text-xs sm:text-sm flex-1 flex flex-col justify-between">
-                  <div className="pt-1">
-                    <span className="text-white/60 text-xs block font-mono">Unit Price</span>
-                    <strong className="text-3xl font-black text-pink-400 font-display block mt-0.5">
-                      {drone.price}
-                    </strong>
-                    <span className="text-white/50 text-[10px] font-mono">per unit</span>
-                  </div>
-
-                  {drone.specs && drone.specs.length > 0 && (
-                    <div className="pt-3 space-y-2 text-left flex-1">
-                      {drone.specs.map((spec, idx) => (
-                        <div key={idx} className="flex justify-between items-center text-xs bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-                          <span className="text-white/60 font-mono text-[11px]">{spec.label}</span>
-                          <strong className="text-white font-semibold font-mono text-[11px]">{spec.value}</strong>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {drone.description && (
-                    <div className="pt-3 text-left">
-                      <p className="text-xs text-white/75 leading-relaxed line-clamp-2">
-                        {drone.description}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action Button — Pinned at Card Bottom */}
-                <div className="p-5 pt-0 shrink-0">
-                  <a
-                    href="#contact"
-                    data-cursor="cta"
-                    className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition text-center block ${
-                      drone.featured
-                        ? 'bg-pink-500 hover:bg-pink-400 text-white shadow-[0_0_15px_rgba(255,20,147,0.5)]'
-                        : 'bg-white/10 hover:bg-pink-500/20 text-white border border-white/20'
-                    }`}
-                  >
-                    Order {drone.name} →
-                  </a>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* ── Essential Flight Accessories & Add-ons ── */}
-        <div data-reveal className="mb-12 sm:mb-16">
-          <div className="text-center mb-8">
-            <span className="eyebrow block text-pink-300 font-bold uppercase tracking-widest text-xs mb-1">
-              Payload & Hardware Add-ons
-            </span>
-            <h3 className="font-display text-2xl sm:text-3xl font-black uppercase text-white tracking-tight">
-              Essential Flight Accessories
+        {/* ── 1. Commercial Drone Models Horizontal Slider with Controls ── */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display text-lg sm:text-xl font-black uppercase text-white tracking-wide flex items-center gap-2">
+              <span>🚁 Drone Models ({drones.length})</span>
+              <span className="text-[10px] font-mono text-pink-300 bg-pink-500/20 px-2 py-0.5 rounded-full border border-pink-500/30">
+                Incl. Customizable Drone
+              </span>
             </h3>
+
+            {/* Scroll Arrow Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => scrollContainer(droneScrollRef, 'left')}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-pink-500/30 text-white border border-white/20 flex items-center justify-center transition active:scale-95 text-sm font-bold"
+                aria-label="Scroll left"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollContainer(droneScrollRef, 'right')}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-pink-500/30 text-white border border-white/20 flex items-center justify-center transition active:scale-95 text-sm font-bold"
+                aria-label="Scroll right"
+              >
+                ›
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Horizontal Scroll Track */}
+          <div
+            ref={droneScrollRef}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 pt-1"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {drones.map((drone, index) => {
+              const defaultImages = [
+                'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1521405924368-64c5b84bec60?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=800&q=80',
+              ];
+              const displayImg = drone.imageUrl || defaultImages[index % defaultImages.length];
+
+              return (
+                <div
+                  key={drone.id || drone.name}
+                  className={`w-72 sm:w-80 shrink-0 snap-center rounded-2xl bg-[#16060c] border transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-lg ${
+                    drone.featured
+                      ? 'border-pink-500/70 shadow-[0_0_20px_rgba(255,20,147,0.25)]'
+                      : 'border-rose-500/30 hover:border-pink-400'
+                  }`}
+                >
+                  {/* Compact Header Image */}
+                  <div className="w-full h-44 bg-black/60 border-b border-white/10 relative overflow-hidden shrink-0 group">
+                    <img
+                      src={displayImg}
+                      alt={drone.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#16060c] via-transparent to-transparent opacity-80" />
+                    {drone.badge && (
+                      <span className="absolute top-2.5 right-2.5 font-mono text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-pink-500 text-white shadow-[0_0_10px_rgba(255,20,147,0.8)] border border-pink-300">
+                        {drone.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Header Info */}
+                  <div className="p-3 text-center border-b bg-white/5 border-white/10">
+                    <h4 className="font-display text-base font-black uppercase text-white tracking-wide leading-snug">
+                      {drone.name}
+                    </h4>
+                    {drone.tagline && (
+                      <p className="text-[10px] text-pink-300 mt-0.5 font-mono font-medium truncate">
+                        {drone.tagline}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Price & Specs & Description (Pure Details, No buttons inside) */}
+                  <div className="p-4 space-y-3 text-center divide-y divide-white/10 text-xs flex-1 flex flex-col justify-between">
+                    <div>
+                      <span className="text-white/50 text-[10px] block font-mono">Unit Price</span>
+                      <strong className="text-xl font-black text-pink-400 font-display block mt-0.5">
+                        {drone.price}
+                      </strong>
+                    </div>
+
+                    {drone.specs && drone.specs.length > 0 && (
+                      <div className="pt-2.5 space-y-1 text-left flex-1">
+                        {drone.specs.map((spec, idx) => (
+                          <div key={idx} className="flex justify-between items-center text-[10px] bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                            <span className="text-white/60 font-mono">{spec.label}</span>
+                            <strong className="text-white font-semibold font-mono">{spec.value}</strong>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {drone.description && (
+                      <div className="pt-2 text-left">
+                        <p className="text-[10px] text-white/70 leading-relaxed line-clamp-2">
+                          {drone.description}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── 2. Major Accessories (6 Items) Horizontal Slider with Controls ── */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display text-lg sm:text-xl font-black uppercase text-white tracking-wide">
+              ⚡ 6 Major Setup Accessories & Add-ons
+            </h3>
+
+            {/* Scroll Arrow Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => scrollContainer(accScrollRef, 'left')}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-pink-500/30 text-white border border-white/20 flex items-center justify-center transition active:scale-95 text-sm font-bold"
+                aria-label="Scroll left"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollContainer(accScrollRef, 'right')}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-pink-500/30 text-white border border-white/20 flex items-center justify-center transition active:scale-95 text-sm font-bold"
+                aria-label="Scroll right"
+              >
+                ›
+              </button>
+            </div>
+          </div>
+
+          {/* Horizontal Scroll Track */}
+          <div
+            ref={accScrollRef}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 pt-1"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {ACCESSORIES.map((acc) => (
               <div
                 key={acc.title}
-                className="bg-[#16060c] border border-rose-500/30 hover:border-pink-400 p-5 rounded-2xl flex flex-col justify-between transition group shadow-md"
+                className="w-64 sm:w-72 shrink-0 snap-center bg-[#16060c] border border-rose-500/30 hover:border-pink-400 p-4 rounded-2xl flex flex-col justify-between transition shadow-md"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-2xl">{acc.icon}</span>
-                    <span className="font-mono text-sm font-black text-pink-400 bg-pink-500/10 border border-pink-500/20 px-2.5 py-1 rounded-lg">
+                    <span className="font-mono text-[11px] font-black text-pink-400 bg-pink-500/10 border border-pink-500/20 px-2 py-0.5 rounded-lg">
                       {acc.price}
                     </span>
                   </div>
-                  <h4 className="font-display text-base font-bold text-white uppercase group-hover:text-pink-300 transition-colors">
+                  <h4 className="font-display text-sm font-bold text-white uppercase leading-snug">
                     {acc.title}
                   </h4>
-                  <p className="text-xs text-white/70 mt-2 leading-relaxed font-medium">
+                  <p className="text-[11px] text-white/70 mt-2 leading-relaxed font-medium line-clamp-3">
                     {acc.desc}
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-white/10">
-                  <a
-                    href="#contact"
-                    data-cursor="hover"
-                    className="w-full py-2 bg-white/5 hover:bg-pink-500/20 text-white font-mono text-[11px] font-bold uppercase tracking-wider rounded-lg border border-white/10 transition text-center block"
-                  >
-                    + Add to Order
-                  </a>
-                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── "What's Included with Every Drone Purchase" Card ── */}
-        <div data-reveal className="bg-[#16060c] border border-rose-500/30 rounded-3xl p-6 sm:p-10 shadow-[0_0_40px_rgba(255,20,147,0.15)] mb-10 max-w-4xl mx-auto">
-          <h3 className="font-display text-2xl sm:text-3xl font-black uppercase text-center text-white mb-8 tracking-tight">
-            What's Included with Every Drone Purchase
+        {/* ── 3. Standalone Brochure Download Section (With Form Popup) ── */}
+        <div ref={ref} data-reveal className="max-w-2xl mx-auto bg-gradient-to-r from-[#200713] via-[#16060c] to-[#200713] border border-rose-500/40 rounded-3xl p-6 sm:p-8 text-center shadow-[0_0_40px_rgba(255,20,147,0.2)]">
+          <div className="w-12 h-12 bg-pink-500/20 border border-pink-400/40 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 text-pink-300">
+            📄
+          </div>
+          <h3 className="font-display text-xl sm:text-2xl font-black uppercase text-white tracking-tight">
+            Download Complete Drone & Pricing Brochure
           </h3>
+          <p className="text-xs sm:text-sm text-white/80 mt-2 max-w-lg mx-auto leading-relaxed">
+            Get full technical fleet specs, ground control station details, LED payload screen options, DGCA clearance info, and commercial sales pricing.
+          </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {INCLUDED_BENEFITS.map((benefit, idx) => (
-              <div
-                key={idx}
-                className="bg-white/5 border-l-4 border-pink-500 rounded-r-2xl p-4 sm:p-5 flex items-start gap-3 border-y border-r border-white/10 hover:border-pink-500/50 transition"
-              >
-                <span className="text-pink-400 font-bold text-lg leading-none shrink-0">✓</span>
-                <p className="text-xs sm:text-sm font-semibold text-white/90 leading-relaxed">
-                  {benefit}
-                </p>
-              </div>
-            ))}
+          <div className="mt-5">
+            <button
+              type="button"
+              onClick={() => setBrochureModalOpen(true)}
+              data-cursor="cta"
+              className="inline-flex items-center justify-center gap-2.5 px-8 py-3.5 bg-gradient-to-r from-pink-500 via-rose-600 to-pink-500 hover:from-pink-400 hover:to-rose-500 text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-[0_0_25px_rgba(255,20,147,0.4)] transition hover:scale-[1.03] active:scale-95"
+            >
+              <span>📄 Fill Form & Download PDF Brochure</span>
+              <span>→</span>
+            </button>
           </div>
-        </div>
-
-        {/* ── Main Bottom Action Buttons ── */}
-        <div data-reveal className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
-          <a
-            href="#contact"
-            data-cursor="cta"
-            className="w-full sm:w-1/2 py-4 bg-gradient-to-r from-purple-800 to-indigo-900 hover:from-purple-700 hover:to-indigo-800 text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-2xl text-center shadow-lg border border-purple-500/40 transition hover:scale-[1.02]"
-          >
-            🛒 Order Drones & Accessories
-          </a>
-
-          <a
-            href="/Connect2Air_Drone_Brochure.pdf"
-            download
-            data-cursor="cta"
-            className="w-full sm:w-1/2 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-2xl text-center shadow-lg shadow-emerald-900/40 border border-emerald-400/40 transition hover:scale-[1.02] flex items-center justify-center gap-2"
-          >
-            <span>📄 Download PDF Brochure</span>
-          </a>
         </div>
 
       </div>
+
+      {/* Interactive Brochure & Lead Contact Modal */}
+      <FranchiseBrochureModal
+        isOpen={brochureModalOpen}
+        onClose={() => setBrochureModalOpen(false)}
+      />
     </section>
   );
 }
+
+

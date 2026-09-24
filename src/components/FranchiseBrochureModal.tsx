@@ -3,12 +3,26 @@ import { saveCMSEnquiry } from '@/utils/cmsStorage';
 import { getApiBaseUrl } from '@/utils/apiBase';
 import { downloadFranchiseBrochure } from '@/utils/generateBrochure';
 
+export interface SelectedItemDetails {
+  title: string;
+  subtitle?: string;
+  tagline?: string;
+  price?: string;
+  badge?: string;
+  imageUrl?: string;
+  desc?: string;
+  description?: string;
+  specs?: { label: string; value: string }[];
+  type?: 'drone' | 'accessory' | 'general';
+}
+
 interface FranchiseBrochureModalProps {
   isOpen: boolean;
   onClose: () => void;
+  selectedItem?: SelectedItemDetails | null;
 }
 
-export const FranchiseBrochureModal: React.FC<FranchiseBrochureModalProps> = ({ isOpen, onClose }) => {
+export const FranchiseBrochureModal: React.FC<FranchiseBrochureModalProps> = ({ isOpen, onClose, selectedItem }) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -41,8 +55,8 @@ export const FranchiseBrochureModal: React.FC<FranchiseBrochureModalProps> = ({ 
       phone: formData.phone.trim(),
       email: formData.email.trim() || 'N/A',
       company: formData.city.trim() ? `City: ${formData.city.trim()}` : 'N/A',
-      message: 'Requested Drone & Franchise Sales Brochure Download',
-      source: 'Drone Sales Brochure Lead',
+      message: selectedItem ? `Requested Brochure & Details for: ${selectedItem.title}` : 'Requested Drone & Franchise Sales Brochure Download',
+      source: selectedItem ? `Brochure Request - ${selectedItem.title}` : 'Drone Sales Brochure Lead',
     };
 
     let backendId = undefined;
@@ -95,7 +109,7 @@ export const FranchiseBrochureModal: React.FC<FranchiseBrochureModalProps> = ({ 
         {!downloaded ? (
           <>
             {/* Header */}
-            <div className="text-center mb-6">
+            <div className="text-center mb-5">
               <span className="eyebrow block text-pink-300 font-bold uppercase tracking-widest text-xs mb-1.5">
                 Connect2Air Commercial Drone Sales
               </span>
@@ -106,6 +120,39 @@ export const FranchiseBrochureModal: React.FC<FranchiseBrochureModalProps> = ({ 
                 Get full technical specs for industrial light-show drones, LED payload screens, battery docks, pricing tiers, pilot training, and revenue models.
               </p>
             </div>
+
+            {/* Selected Item Preview Box if clicked from a specific card */}
+            {selectedItem && (
+              <div className="mb-5 bg-gradient-to-r from-pink-500/20 to-rose-500/10 border border-pink-500/40 rounded-2xl p-4 flex items-center gap-4 shadow-lg">
+                {selectedItem.imageUrl ? (
+                  <img src={selectedItem.imageUrl} alt={selectedItem.title} className="w-16 h-16 object-cover rounded-xl border border-white/10 shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 rounded-xl bg-pink-500/20 border border-pink-400/30 flex items-center justify-center text-xl shrink-0">
+                    🛸
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  {selectedItem.badge && (
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-pink-300 bg-black/40 border border-pink-500/30 px-2 py-0.5 rounded-full inline-block mb-1">
+                      {selectedItem.badge}
+                    </span>
+                  )}
+                  <h4 className="font-display text-base font-black uppercase text-white truncate">
+                    {selectedItem.title}
+                  </h4>
+                  {(selectedItem.subtitle || selectedItem.tagline) && (
+                    <p className="text-[11px] text-pink-300/80 font-mono truncate">
+                      {selectedItem.subtitle || selectedItem.tagline}
+                    </p>
+                  )}
+                  {selectedItem.price && (
+                    <span className="font-display text-sm font-black text-pink-400 block mt-0.5">
+                      {selectedItem.price}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Feature Pills */}
             <div className="grid grid-cols-2 gap-2 mb-6">
@@ -228,3 +275,5 @@ export const FranchiseBrochureModal: React.FC<FranchiseBrochureModalProps> = ({ 
     </div>
   );
 };
+
+export default FranchiseBrochureModal;

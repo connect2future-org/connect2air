@@ -9,6 +9,36 @@ import {
   type PricingItem,
 } from '@/utils/cmsStorage';
 
+const DEFAULT_PRICING_ITEMS: PricingItem[] = [
+  {
+    id: 'p1',
+    step: 'ONE FLY',
+    price: '₹15,000',
+    duration: '10 MINS',
+    badge: '1 Flight',
+    timeline: 'Single Display',
+    description: '1 Flight duration of 10 minutes over the venue crowd.',
+  },
+  {
+    id: 'p2',
+    step: 'TWO FLIES',
+    price: '₹30,000',
+    duration: '20 MINS',
+    badge: '2 Flights',
+    timeline: '2 Sessions',
+    description: '2 Flights totaling 20 minutes with 1 hour interval.',
+  },
+  {
+    id: 'p3',
+    step: 'THREE FLIES',
+    price: '₹45,000',
+    duration: '30 MINS',
+    badge: '3 Flights',
+    timeline: '3 Sessions',
+    description: '3 Flights totaling 30 minutes with 1 hour intervals.',
+  },
+];
+
 export default function Services() {
   const sectionRef = useRef<HTMLElement>(null);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -23,8 +53,8 @@ export default function Services() {
     const loadData = async () => {
       const servicesData = await getCMSServicesAsync();
       const pricingData = await getCMSPricingAsync();
-      setServicesList(servicesData);
-      setPricingList(pricingData);
+      if (servicesData && servicesData.length > 0) setServicesList(servicesData);
+      if (pricingData && pricingData.length > 0) setPricingList(pricingData);
     };
     loadData();
     window.addEventListener('c2a_cms_updated', loadData);
@@ -46,9 +76,9 @@ export default function Services() {
     if (!section) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        headingRef.current?.querySelectorAll('[data-reveal]') ?? [],
+        headingRef.current?.querySelectorAll('.reveal-anim') ?? [],
         { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, stagger: 0.08, ease: 'power3.out', scrollTrigger: { trigger: section, start: 'top 75%' } }
+        { y: 0, opacity: 1, duration: 0.8, stagger: 0.08, ease: 'power3.out', scrollTrigger: { trigger: section, start: 'top 85%' } }
       );
 
       panelRefs.current.forEach((panel, i) => {
@@ -68,7 +98,9 @@ export default function Services() {
       });
     }, section);
     return () => ctx.revert();
-  }, [servicesList]);
+  }, [servicesList, pricingList]);
+
+  const displayPricing = (pricingList && pricingList.length > 0) ? pricingList : DEFAULT_PRICING_ITEMS;
 
   return (
     <section id="services" ref={sectionRef} className="relative bg-[var(--color-void)] py-10 sm:py-16">
@@ -76,25 +108,25 @@ export default function Services() {
         <div className="grid gap-8 lg:grid-cols-12 lg:items-center lg:gap-12">
           {/* Left Column: Heading & Tagline */}
           <div className="lg:col-span-5">
-            <div data-reveal className="eyebrow mb-4 text-pink-300 font-bold uppercase tracking-widest">Services & Packages</div>
-            <h2 data-reveal className="font-display text-4xl font-extrabold uppercase leading-[1.02] tracking-tight sm:text-6xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
+            <div className="reveal-anim eyebrow mb-4 text-pink-300 font-bold uppercase tracking-widest">Services & Packages</div>
+            <h2 className="reveal-anim font-display text-4xl font-extrabold uppercase leading-[1.02] tracking-tight sm:text-6xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
               One sky.
               <br />
               <span className="text-[var(--color-signal-2)] text-glow drop-shadow-[0_0_20px_rgba(255,77,109,0.7)]">Endless possibilities.</span>
             </h2>
-            <p data-reveal className="mt-4 text-lg font-medium text-white/90 leading-relaxed">
+            <p className="reveal-anim mt-4 text-lg font-medium text-white/90 leading-relaxed">
               Aerial advertising engineered for moments people remember. Multi-flight display packages tailored to your event schedule.
             </p>
-            <div data-reveal className="mt-5 inline-flex items-center gap-2.5 rounded-full border border-pink-500/40 bg-pink-500/10 px-4 py-2 font-mono text-xs font-bold text-pink-300 shadow-[0_0_15px_rgba(255,42,85,0.2)]">
+            <div className="reveal-anim mt-5 inline-flex items-center gap-2.5 rounded-full border border-pink-500/40 bg-pink-500/10 px-4 py-2 font-mono text-xs font-bold text-pink-300 shadow-[0_0_15px_rgba(255,42,85,0.2)]">
               <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
               <span>Same Ground, Bigger Possibilities</span>
             </div>
           </div>
 
-          {/* Right Column: Pricing Flight Cards */}
-          <div data-reveal className="lg:col-span-7">
+          {/* Right Column: Pricing Flight Cards (Always visible) */}
+          <div className="lg:col-span-7">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {pricingList.map((pkg, idx) => (
+              {displayPricing.map((pkg, idx) => (
                 <div
                   key={pkg.id || pkg.step}
                   onClick={() => setSelectedPricing(pkg)}

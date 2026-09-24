@@ -80,7 +80,8 @@ export default function Navbar() {
                     e.preventDefault();
                     const target = document.querySelector(link.href);
                     if (target) {
-                      target.scrollIntoView({ behavior: 'smooth' });
+                      const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 84;
+                      window.scrollTo({ top: offsetTop, behavior: 'smooth' });
                       window.history.pushState(null, '', link.href);
                     }
                   }
@@ -131,7 +132,8 @@ export default function Navbar() {
                 e.preventDefault();
                 const target = document.querySelector(link.href);
                 if (target) {
-                  target.scrollIntoView({ behavior: 'smooth' });
+                  const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 84;
+                  window.scrollTo({ top: offsetTop, behavior: 'smooth' });
                   window.history.pushState(null, '', link.href);
                 }
               }

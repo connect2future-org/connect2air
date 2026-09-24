@@ -55,7 +55,7 @@ export default function Process() {
 
   return (
     <section id="process" className="relative bg-[var(--color-void)]">
-      <div ref={wrapRef} className="relative overflow-hidden py-28 sm:py-0">
+      <div ref={wrapRef} className="relative overflow-hidden py-10 sm:py-0">
         <div className="container-page mb-10 sm:absolute sm:left-0 sm:right-0 sm:top-10 sm:z-20 sm:mb-0">
           <div className="eyebrow mb-3 text-pink-300 font-bold uppercase tracking-widest text-xs">Process</div>
           <h2 className="font-display max-w-xl text-3xl font-black uppercase leading-[1.02] tracking-tight sm:text-5xl lg:text-6xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
