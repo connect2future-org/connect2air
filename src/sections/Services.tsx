@@ -75,12 +75,6 @@ export default function Services() {
     const section = sectionRef.current;
     if (!section) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        headingRef.current?.querySelectorAll('.reveal-anim') ?? [],
-        { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, stagger: 0.08, ease: 'power3.out', scrollTrigger: { trigger: section, start: 'top 85%' } }
-      );
-
       panelRefs.current.forEach((panel, i) => {
         const next = panelRefs.current[i + 1];
         if (!panel || !next) return;
@@ -106,18 +100,18 @@ export default function Services() {
     <section id="services" ref={sectionRef} className="relative bg-[var(--color-void)] py-10 sm:py-16">
       <div id="pricing" ref={headingRef} className="container-page mb-8 sm:mb-12 scroll-mt-24">
         <div className="grid gap-8 lg:grid-cols-12 lg:items-center lg:gap-12">
-          {/* Left Column: Heading & Tagline */}
+          {/* Left Column: Heading & Tagline (Always 100% visible) */}
           <div className="lg:col-span-5">
-            <div className="reveal-anim eyebrow mb-4 text-pink-300 font-bold uppercase tracking-widest">Services & Packages</div>
-            <h2 className="reveal-anim font-display text-4xl font-extrabold uppercase leading-[1.02] tracking-tight sm:text-6xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
+            <div className="eyebrow mb-4 text-pink-300 font-bold uppercase tracking-widest">Services & Packages</div>
+            <h2 className="font-display text-4xl font-extrabold uppercase leading-[1.02] tracking-tight sm:text-6xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
               One sky.
               <br />
               <span className="text-[var(--color-signal-2)] text-glow drop-shadow-[0_0_20px_rgba(255,77,109,0.7)]">Endless possibilities.</span>
             </h2>
-            <p className="reveal-anim mt-4 text-lg font-medium text-white/90 leading-relaxed">
+            <p className="mt-4 text-lg font-medium text-white/90 leading-relaxed">
               Aerial advertising engineered for moments people remember. Multi-flight display packages tailored to your event schedule.
             </p>
-            <div className="reveal-anim mt-5 inline-flex items-center gap-2.5 rounded-full border border-pink-500/40 bg-pink-500/10 px-4 py-2 font-mono text-xs font-bold text-pink-300 shadow-[0_0_15px_rgba(255,42,85,0.2)]">
+            <div className="mt-5 inline-flex items-center gap-2.5 rounded-full border border-pink-500/40 bg-pink-500/10 px-4 py-2 font-mono text-xs font-bold text-pink-300 shadow-[0_0_15px_rgba(255,42,85,0.2)]">
               <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
               <span>Same Ground, Bigger Possibilities</span>
             </div>
