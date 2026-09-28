@@ -78,7 +78,9 @@ export default function Services() {
       panelRefs.current.forEach((panel, i) => {
         const next = panelRefs.current[i + 1];
         if (!panel || !next) return;
-        gsap.to(panel, {
+        const innerCard = panel.querySelector('.group');
+        if (!innerCard) return;
+        gsap.to(innerCard, {
           scale: 0.94,
           opacity: 0.35,
           ease: 'none',

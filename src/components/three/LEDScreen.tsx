@@ -150,7 +150,7 @@ export function LEDScreen() {
   useFrame((state) => {
     const pos = geometry.attributes.position;
     const orig = geometry.userData.original as Float32Array;
-    const t = state.clock.elapsedTime;
+    const t = performance.now() * 0.001;
 
     for (let i = 0; i < pos.count; i++) {
       const ix = i * 3;

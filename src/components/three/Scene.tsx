@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect, useMemo } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Lighting } from './Lighting';
@@ -55,6 +55,19 @@ function CameraRig({ contained }: { contained: boolean }) {
 
 export function Scene({ contained = false }: SceneProps) {
   const { dpr, postProcessing } = useResponsive3D();
+  const [inView, setInView] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const cameraOptions = useMemo(
     () => ({
@@ -67,31 +80,34 @@ export function Scene({ contained = false }: SceneProps) {
   );
 
   return (
-    <Canvas
-      dpr={[1, dpr]}
-      camera={cameraOptions}
-      gl={{
-        antialias: true,
-        alpha: true,
-        powerPreference: 'high-performance',
-        stencil: false,
-      }}
-      onCreated={({ gl }) => {
-        gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.05;
-        gl.outputColorSpace = THREE.SRGBColorSpace;
-        // Transparent so the website's own hero background shows through.
-        gl.setClearColor(0x000000, 0);
-      }}
-    >
-      <CameraRig contained={contained} />
+    <div ref={containerRef} className="h-full w-full">
+      <Canvas
+        frameloop={inView ? 'always' : 'never'}
+        dpr={[1, dpr]}
+        camera={cameraOptions}
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: 'high-performance',
+          stencil: false,
+        }}
+        onCreated={({ gl }) => {
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.05;
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+          // Transparent so the website's own hero background shows through.
+          gl.setClearColor(0x000000, 0);
+        }}
+      >
+        <CameraRig contained={contained} />
 
-      <Suspense fallback={null}>
-        <Lighting />
-        <HeroDrone />
-      </Suspense>
+        <Suspense fallback={null}>
+          <Lighting />
+          <HeroDrone />
+        </Suspense>
 
-      <PostProcessing enabled={postProcessing} />
-    </Canvas>
+        <PostProcessing enabled={postProcessing} />
+      </Canvas>
+    </div>
   );
 }

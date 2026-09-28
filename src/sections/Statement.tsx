@@ -14,50 +14,35 @@ export default function Statement() {
     const wrap = wrapRef.current;
     if (!wrap) return;
     const ctx = gsap.context(() => {
-      const st = ScrollTrigger.create({
-        trigger: wrap,
-        start: 'top top',
-        end: '+=100%',
-        scrub: 0.4,
-        pin: true,
-        onUpdate: (self) => {
-          progressRef.current = self.progress;
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: wrap,
+          start: 'top top',
+          end: '+=100%',
+          scrub: true,
+          pin: true,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            progressRef.current = self.progress;
+          },
         },
       });
 
-      gsap.to(rowARef.current, {
-        xPercent: -14,
-        ease: 'none',
-        scrollTrigger: { trigger: wrap, start: 'top top', end: '+=100%', scrub: 0.4 },
-      });
-      gsap.to(rowBRef.current, {
-        xPercent: 10,
-        ease: 'none',
-        scrollTrigger: { trigger: wrap, start: 'top top', end: '+=100%', scrub: 0.4 },
-      });
-      gsap.to(rowCRef.current, {
-        xPercent: -8,
-        ease: 'none',
-        scrollTrigger: { trigger: wrap, start: 'top top', end: '+=100%', scrub: 0.4 },
-      });
-      gsap.fromTo(
-        captionRef.current,
-        { opacity: 0.5, y: 15 },
-        {
-          opacity: 1,
-          y: 0,
-          ease: 'none',
-          scrollTrigger: { trigger: wrap, start: 'top 85%', end: 'top 30%', scrub: 0.4 },
-        }
-      );
-
-      return () => st.kill();
+      tl.to(rowARef.current, { xPercent: -14, ease: 'none' }, 0)
+        .to(rowBRef.current, { xPercent: 10, ease: 'none' }, 0)
+        .to(rowCRef.current, { xPercent: -8, ease: 'none' }, 0)
+        .fromTo(
+          captionRef.current,
+          { opacity: 0.5, y: 15 },
+          { opacity: 1, y: 0, ease: 'none' },
+          0
+        );
     }, wrap);
     return () => ctx.revert();
   }, []);
 
   return (
-    <div ref={wrapRef} className="relative h-[100svh] overflow-hidden bg-[var(--color-void)]">
+    <div ref={wrapRef} className="relative h-screen overflow-hidden bg-[var(--color-void)]">
       <PixelField progressRef={progressRef} className="absolute inset-0 h-full w-full opacity-70" />
 
       <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">

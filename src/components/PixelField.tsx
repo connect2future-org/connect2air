@@ -120,7 +120,21 @@ export default function PixelField({ progressRef, label = 'CONNECT2AIR', classNa
       return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
 
+    let isVisible = true;
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible && !rafRef.current) {
+        rafRef.current = requestAnimationFrame(draw);
+      }
+    }, { threshold: 0 });
+    observer.observe(canvas);
+
     function draw(t: number) {
+      if (!isVisible) {
+        rafRef.current = undefined;
+        return;
+      }
+
       const w = window.innerWidth;
       const h = window.innerHeight;
       const dpr = dprRef.current;
@@ -168,6 +182,7 @@ export default function PixelField({ progressRef, label = 'CONNECT2AIR', classNa
     rafRef.current = requestAnimationFrame(draw);
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('resize', build);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };

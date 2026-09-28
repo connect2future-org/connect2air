@@ -92,11 +92,7 @@ export default function Hero({ ready }: { ready: boolean }) {
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      gsap.to(contentRef.current, {
-        yPercent: -18,
-        opacity: 0,
-        scale: 0.94,
-        ease: 'none',
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: 'top top',
@@ -105,41 +101,10 @@ export default function Hero({ ready }: { ready: boolean }) {
         },
       });
 
-      /* Bridge — moves with parallax but STAYS VISIBLE (no opacity fade) */
-      gsap.to(bridgeRef.current, {
-        yPercent: -10,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-        },
-      });
-
-      gsap.to(sceneWrapRef.current, {
-        yPercent: -10,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-        },
-      });
-
-      gsap.to(glowRef.current, {
-        yPercent: 12,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-        },
-      });
-
-      ScrollTrigger.refresh();
+      tl.to(contentRef.current, { yPercent: -18, opacity: 0, scale: 0.94, ease: 'none' }, 0)
+        .to(bridgeRef.current, { yPercent: -10, ease: 'none' }, 0)
+        .to(sceneWrapRef.current, { yPercent: -10, ease: 'none' }, 0)
+        .to(glowRef.current, { yPercent: 12, ease: 'none' }, 0);
     }, section);
 
     return () => ctx.revert();
@@ -150,7 +115,7 @@ export default function Hero({ ready }: { ready: boolean }) {
   return (    <section
       id="home"
       ref={sectionRef}
-      className="relative flex min-h-[100svh] overflow-hidden bg-[var(--color-void)] lg:min-h-screen"
+      className="relative flex min-h-screen overflow-hidden bg-[var(--color-void)]"
     >
       <div
         ref={glowRef}

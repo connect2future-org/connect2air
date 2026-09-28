@@ -612,7 +612,7 @@ export const getCMSDrones = (): DroneItem[] => {
   return DEFAULT_DRONES;
 };
 
-export const saveCMSDrones = (items: DroneItem[]) => {
+function cacheDronesToLocalStorage(items: DroneItem[]) {
   try {
     localStorage.setItem(STORAGE_KEYS.DRONES, JSON.stringify(items));
   } catch (err) {
@@ -627,6 +627,10 @@ export const saveCMSDrones = (items: DroneItem[]) => {
       console.error('Failed to write to localStorage:', e);
     }
   }
+}
+
+export const saveCMSDrones = (items: DroneItem[]) => {
+  cacheDronesToLocalStorage(items);
   notifyCMSUpdate();
 };
 
@@ -648,7 +652,7 @@ export async function getCMSDronesAsync(): Promise<DroneItem[]> {
         featured: Boolean(raw.featured),
         createdAt: raw.createdAt,
       }));
-      saveCMSDrones(formatted);
+      cacheDronesToLocalStorage(formatted);
       return formatted;
     }
   } catch (e) {}
@@ -766,8 +770,14 @@ export const getCMSAccessories = (): AccessoryItem[] => {
   return DEFAULT_ACCESSORIES;
 };
 
+function cacheAccessoriesToLocalStorage(items: AccessoryItem[]) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.ACCESSORIES, JSON.stringify(items));
+  } catch (err) {}
+}
+
 export const saveCMSAccessories = (items: AccessoryItem[]) => {
-  localStorage.setItem(STORAGE_KEYS.ACCESSORIES, JSON.stringify(items));
+  cacheAccessoriesToLocalStorage(items);
   notifyCMSUpdate();
 };
 
@@ -788,7 +798,7 @@ export async function getCMSAccessoriesAsync(): Promise<AccessoryItem[]> {
         imageUrl: raw.imageUrl || '',
         createdAt: raw.createdAt,
       }));
-      saveCMSAccessories(formatted);
+      cacheAccessoriesToLocalStorage(formatted);
       return formatted;
     }
   } catch (e) {}

@@ -54,7 +54,7 @@ export default function Experience() {
   const env = environments[0];
 
   return (
-    <div id="experience" ref={wrapRef} className="relative h-[100svh] overflow-hidden bg-[var(--color-void-2)]">
+    <div id="experience" ref={wrapRef} className="relative h-screen overflow-hidden bg-[var(--color-void-2)]">
       {/* environment word backdrop, scrolls horizontally beneath the flight path */}
       <div ref={trackRef} className="absolute inset-0 flex items-center will-change-transform">
         <div className="flex shrink-0 gap-[18vw] pl-[10vw]">

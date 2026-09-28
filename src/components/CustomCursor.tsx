@@ -16,25 +16,41 @@ export default function CustomCursor() {
     let rx = mx;
     let ry = my;
 
+    let isRunning = false;
+    let raf: number;
+
+    const startLoop = () => {
+      if (!isRunning) {
+        isRunning = true;
+        loop();
+      }
+    };
+
     const onMove = (e: PointerEvent) => {
       mx = e.clientX;
       my = e.clientY;
       if (dotRef.current) {
         dotRef.current.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
       }
+      startLoop();
     };
     window.addEventListener('pointermove', onMove);
 
-    let raf: number;
     const loop = () => {
-      rx += (mx - rx) * 0.18;
-      ry += (my - ry) * 0.18;
+      const dx = mx - rx;
+      const dy = my - ry;
+      rx += dx * 0.18;
+      ry += dy * 0.18;
       if (ringRef.current) {
         ringRef.current.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
       }
-      raf = requestAnimationFrame(loop);
+      if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
+        raf = requestAnimationFrame(loop);
+      } else {
+        isRunning = false;
+      }
     };
-    raf = requestAnimationFrame(loop);
+    startLoop();
 
     const setState = (state: 'default' | 'hover' | 'cta' | 'explore') => {
       const ring = ringRef.current;

@@ -116,7 +116,7 @@ export function HeroDrone() {
     if (!group) return;
 
     const dt = Math.min(delta, 1 / 30);
-    const t = state.clock.elapsedTime;
+    const t = performance.now() * 0.001;
 
     const s = smooth.current;
     const sp = spin.current;
