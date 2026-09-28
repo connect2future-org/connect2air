@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { contact } from '@/data/siteData';
 import { saveCMSEnquiry } from '@/utils/cmsStorage';
 import { getApiBaseUrl } from '@/utils/apiBase';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 export const ContactModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +14,8 @@ export const ContactModal: React.FC = () => {
     eventLocation: '',
     message: ''
   });
+
+  useBodyScrollLock(isOpen);
 
   useEffect(() => {
     // Show modal shortly after opening site if not previously closed in this session
@@ -72,7 +75,7 @@ export const ContactModal: React.FC = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-opacity duration-300 animate-fadeIn">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/90 transition-opacity duration-300 animate-fadeIn">
       {/* Modal Content Box */}
       <div 
         className="relative w-full max-w-lg bg-gradient-to-b from-[#1c0811] to-[#0a0305] border border-rose-500/40 rounded-2xl p-6 sm:p-8 shadow-[0_0_50px_rgba(255,42,85,0.25)] transition-all duration-300 transform scale-100"
@@ -91,7 +94,7 @@ export const ContactModal: React.FC = () => {
         {submitted ? (
           <div className="py-8 text-center space-y-4">
             <div className="w-16 h-16 bg-pink-500/20 border border-pink-400 text-pink-400 rounded-full flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(255,77,109,0.4)]">
-              <svg className="w-10 h-10 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -181,7 +184,7 @@ export const ContactModal: React.FC = () => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 font-medium transition"
                 >
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   Chat instantly on WhatsApp
                 </a>
                 <button

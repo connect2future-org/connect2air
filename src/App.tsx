@@ -13,7 +13,6 @@ import Statement from '@/sections/Statement';
 import About from '@/sections/About';
 import Services from '@/sections/Services';
 import Franchise from '@/sections/Franchise';
-import Process from '@/sections/Process';
 import Campaigns from '@/sections/Campaigns';
 import Showreel from '@/sections/Showreel';
 import Stats from '@/sections/Stats';
@@ -62,7 +61,6 @@ export default function App() {
         <About />
         <Services />
         <Franchise />
-        <Process />
         <Campaigns />
         <Showreel />
         <Stats />

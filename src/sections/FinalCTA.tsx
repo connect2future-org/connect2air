@@ -20,7 +20,7 @@ export default function FinalCTA() {
           scale: 1,
           opacity: 0.55,
           ease: 'none',
-          scrollTrigger: { trigger: section, start: 'top bottom', end: 'top 30%', scrub: 0.6 },
+          scrollTrigger: { trigger: section, start: 'top bottom', end: 'top 30%', scrub: true },
         }
       );
       gsap.fromTo(

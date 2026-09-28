@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { getCMSMediaAsync, type MediaItem } from '@/utils/cmsStorage';
 
 // Map size field → Tailwind aspect-ratio class and label
@@ -83,11 +84,7 @@ function ViewMoreSheet({
   items: MediaItem[];
   onClose: () => void;
 }) {
-  // Lock body scroll
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
-  }, []);
+  useBodyScrollLock(true);
 
   return (
     <div

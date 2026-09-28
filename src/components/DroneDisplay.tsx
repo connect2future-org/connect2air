@@ -22,11 +22,10 @@ function Drone({ className, style }: { className?: string; style?: CSSProperties
 /** Deterministic pseudo-random pixel brightness grid, memoised once. */
 function usePixelGrid(cols: number, rows: number) {
   return useMemo(() => {
-    const cells: { on: boolean; delay: number; signal: boolean }[] = [];
+    const cells: { on: boolean; signal: boolean }[] = [];
     for (let i = 0; i < cols * rows; i++) {
       cells.push({
         on: Math.random() > 0.35,
-        delay: Math.random() * 3,
         signal: Math.random() > 0.94,
       });
     }
@@ -70,7 +69,6 @@ export default function DroneDisplay({ className = '' }: { className?: string })
               className="aspect-square rounded-[1px]"
               style={{
                 background: cell.signal ? '#ff1493' : cell.on ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.06)',
-                animation: cell.on ? `ledFlicker 2.6s ease-in-out ${cell.delay}s infinite` : undefined,
               }}
             />
           ))}

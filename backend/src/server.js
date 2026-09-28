@@ -7,6 +7,7 @@ import mediaRoutes from './routes/mediaRoutes.js';
 import pricingRoutes from './routes/pricingRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
 import droneRoutes from './routes/droneRoutes.js';
+import accessoryRoutes from './routes/accessoryRoutes.js';
 
 const app = express();
 const port = Number(process.env.PORT) || 5001;
@@ -32,6 +33,7 @@ app.use('/api/media', mediaRoutes);
 app.use('/api/pricing', pricingRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/drones', droneRoutes);
+app.use('/api/accessories', accessoryRoutes);
 app.use((_req, res) => res.status(404).json({ message: 'Route not found.' }));
 app.use((error, _req, res, _next) => {
   console.error(error);

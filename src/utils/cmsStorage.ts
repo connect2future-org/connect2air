@@ -66,11 +66,24 @@ export interface DroneItem {
   createdAt?: string;
 }
 
+export interface AccessoryItem {
+  id: string;
+  _id?: string;
+  icon?: string;
+  title: string;
+  price: string;
+  desc?: string;
+  description?: string;
+  imageUrl?: string;
+  createdAt?: string;
+}
+
 const STORAGE_KEYS = {
   SERVICES: 'c2a_cms_services',
   PRICING: 'c2a_cms_pricing',
   ENQUIRIES: 'c2a_cms_enquiries',
   DRONES: 'c2a_cms_drones',
+  ACCESSORIES: 'c2a_cms_accessories',
 };
 
 const DEFAULT_PRICING: PricingItem[] = [
@@ -688,6 +701,147 @@ export async function deleteCMSDroneAsync(id: string): Promise<void> {
     saveCMSDrones(filtered);
   }
 }
+
+// --- ACCESSORIES CRUD ---
+const DEFAULT_ACCESSORIES: AccessoryItem[] = [
+  {
+    id: 'acc_1',
+    icon: '🔋',
+    title: 'Intelligent Flight Batteries',
+    price: '₹35,000',
+    desc: 'High-density smart battery packs with self-heating and battery management system.',
+    imageUrl: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=800&h=800&q=80',
+  },
+  {
+    id: 'acc_2',
+    icon: '⚡',
+    title: 'Fast Chargers & Charging Hubs',
+    price: '₹45,000',
+    desc: 'Multi-battery fast-charging stations capable of concurrent multi-dock refueling.',
+    imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&h=800&q=80',
+  },
+  {
+    id: 'acc_3',
+    icon: '🎮',
+    title: 'GCS & Remote Controllers',
+    price: '₹85,000',
+    desc: 'Integrated flight control console loaded with Connect2Air 3D choreography & live telemetry.',
+    imageUrl: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=800&h=800&q=80',
+  },
+  {
+    id: 'acc_4',
+    icon: '🛰️',
+    title: 'RTK / PPK Base Stations',
+    price: '₹95,000',
+    desc: 'Centimeter-level precision RTK positioning towers for mapping, inspection, and light shows.',
+    imageUrl: 'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?auto=format&fit=crop&w=800&h=800&q=80',
+  },
+  {
+    id: 'acc_5',
+    icon: '🪂',
+    title: 'Autonomous Parachute & Safety Gear',
+    price: '₹45,000',
+    desc: 'DGCA compliant dual-deployment automatic parachute systems and landing safety gear.',
+    imageUrl: 'https://images.unsplash.com/photo-1521405924368-64c5b84bec60?auto=format&fit=crop&w=800&h=800&q=80',
+  },
+  {
+    id: 'acc_6',
+    icon: '📷',
+    title: 'Gimbals, Thermal & RGB Payloads',
+    price: '₹1,15,000',
+    desc: 'Radiometric thermal cameras, optical zoom gimbals, and high-lumen LED payloads.',
+    imageUrl: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=800&h=800&q=80',
+  },
+];
+
+export const getCMSAccessories = (): AccessoryItem[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.ACCESSORIES);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  localStorage.setItem(STORAGE_KEYS.ACCESSORIES, JSON.stringify(DEFAULT_ACCESSORIES));
+  return DEFAULT_ACCESSORIES;
+};
+
+export const saveCMSAccessories = (items: AccessoryItem[]) => {
+  localStorage.setItem(STORAGE_KEYS.ACCESSORIES, JSON.stringify(items));
+  notifyCMSUpdate();
+};
+
+export async function getCMSAccessoriesAsync(): Promise<AccessoryItem[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/accessories`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await parseJsonResponse(res);
+    if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+      const formatted: AccessoryItem[] = json.data.map((raw: any) => ({
+        id: raw._id || raw.id,
+        _id: raw._id,
+        icon: raw.icon || '⚡',
+        title: raw.title,
+        price: raw.price,
+        desc: raw.desc || raw.description || '',
+        description: raw.description || raw.desc || '',
+        imageUrl: raw.imageUrl || '',
+        createdAt: raw.createdAt,
+      }));
+      saveCMSAccessories(formatted);
+      return formatted;
+    }
+  } catch (e) {}
+  return getCMSAccessories();
+}
+
+export async function addCMSAccessoryAsync(item: Omit<AccessoryItem, 'id'>): Promise<AccessoryItem> {
+  try {
+    const res = await fetch(`${API_BASE}/api/accessories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item),
+    });
+    const json = await parseJsonResponse(res);
+    if (res.ok && json.success) {
+      notifyCMSUpdate();
+      return { id: json.data._id, _id: json.data._id, ...json.data };
+    }
+  } catch (e) {}
+  const list = getCMSAccessories();
+  const newItem: AccessoryItem = { id: `acc_${Date.now()}`, ...item };
+  saveCMSAccessories([newItem, ...list]);
+  return newItem;
+}
+
+export async function updateCMSAccessoryAsync(id: string, data: Partial<AccessoryItem>): Promise<void> {
+  try {
+    const res = await fetch(`${API_BASE}/api/accessories/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    await parseJsonResponse(res);
+    notifyCMSUpdate();
+  } catch (e) {
+    const list = getCMSAccessories();
+    const updated = list.map((item) => (item.id === id ? { ...item, ...data } : item));
+    saveCMSAccessories(updated);
+  }
+}
+
+export async function deleteCMSAccessoryAsync(id: string): Promise<void> {
+  try {
+    const res = await fetch(`${API_BASE}/api/accessories/${id}`, { method: 'DELETE' });
+    await parseJsonResponse(res);
+    notifyCMSUpdate();
+  } catch (e) {
+    const list = getCMSAccessories();
+    const filtered = list.filter((item) => item.id !== id);
+    saveCMSAccessories(filtered);
+  }
+}
+
 
 
 

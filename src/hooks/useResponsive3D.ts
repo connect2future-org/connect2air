@@ -22,7 +22,8 @@ function measure(): Responsive3D {
 
   const quality: Quality = isMobile ? 'low' : isTablet ? 'medium' : 'high';
 
-  const dpr = isMobile ? 1.25 : isTablet ? 1.5 : 2;
+  // Cap render resolution to keep the hero scene responsive on high-DPI displays.
+  const dpr = isMobile ? 1 : isTablet ? 1.15 : 1.25;
 
   return {
     width,
@@ -33,7 +34,7 @@ function measure(): Responsive3D {
     quality,
     dpr,
     // Post-processing is the first thing we drop on low-power devices.
-    postProcessing: !isMobile,
+    postProcessing: false,
   };
 }
 

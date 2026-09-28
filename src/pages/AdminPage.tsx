@@ -18,12 +18,17 @@ import {
   addCMSDroneAsync,
   updateCMSDroneAsync,
   deleteCMSDroneAsync,
+  getCMSAccessoriesAsync,
+  addCMSAccessoryAsync,
+  updateCMSAccessoryAsync,
+  deleteCMSAccessoryAsync,
   type EnquiryItem,
   type ServiceItem,
   type PricingItem,
   type MediaItem,
   type DroneItem,
   type DroneSpec,
+  type AccessoryItem,
 } from '@/utils/cmsStorage';
 import { getApiBaseUrl } from '@/utils/apiBase';
 import { brand } from '@/data/siteData';
@@ -33,7 +38,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState(false);
-  const [activeTab, setActiveTab] = useState<'drones' | 'enquiries' | 'media' | 'services' | 'pricing'>('drones');
+  const [activeTab, setActiveTab] = useState<'drones' | 'accessories' | 'enquiries' | 'media' | 'services' | 'pricing'>('drones');
 
   // Drones CMS State
   const [drones, setDrones] = useState<DroneItem[]>([]);
@@ -107,6 +112,18 @@ export default function AdminPage() {
     badge: '',
     timeline: '',
     description: '',
+  });
+
+  // Accessories state
+  const [accessories, setAccessories] = useState<AccessoryItem[]>([]);
+  const [editingAccessory, setEditingAccessory] = useState<AccessoryItem | null>(null);
+  const accFileInputRef = useRef<HTMLInputElement>(null);
+  const [accessoryForm, setAccessoryForm] = useState({
+    icon: '⚡',
+    title: '',
+    price: '',
+    desc: '',
+    imageUrl: '',
   });
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -191,6 +208,10 @@ export default function AdminPage() {
     // 5. Drone Products (MongoDB Atlas / Local fallback)
     const droneItems = await getCMSDronesAsync();
     setDrones(droneItems);
+
+    // 6. Accessories Store (MongoDB Atlas / Local fallback)
+    const accItems = await getCMSAccessoriesAsync();
+    setAccessories(accItems);
   };
 
   // Drone Products Actions
@@ -324,6 +345,76 @@ export default function AdminPage() {
       newSpecs[index] = { ...newSpecs[index], [field]: val };
       return { ...prev, specs: newSpecs };
     });
+  };
+
+  // Accessory Image Handler — 1:1 Aspect Ratio Square Crop
+  const handleAccImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const rawDataUrl = event.target?.result as string;
+      const img = new Image();
+      img.src = rawDataUrl;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const SQUARE_SIZE = 800;
+        canvas.width = SQUARE_SIZE;
+        canvas.height = SQUARE_SIZE;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const minDim = Math.min(img.width, img.height);
+          const sx = (img.width - minDim) / 2;
+          const sy = (img.height - minDim) / 2;
+          ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, SQUARE_SIZE, SQUARE_SIZE);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+          setAccessoryForm((prev) => ({ ...prev, imageUrl: compressedBase64 }));
+        } else {
+          setAccessoryForm((prev) => ({ ...prev, imageUrl: rawDataUrl }));
+        }
+      };
+      img.onerror = () => {
+        setAccessoryForm((prev) => ({ ...prev, imageUrl: rawDataUrl }));
+      };
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveAccessory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accessoryForm.title || !accessoryForm.price) {
+      alert('Please fill out Accessory Title and Price.');
+      return;
+    }
+    if (editingAccessory) {
+      await updateCMSAccessoryAsync(editingAccessory.id, accessoryForm);
+      showToast('Accessory updated successfully.');
+    } else {
+      await addCMSAccessoryAsync(accessoryForm);
+      showToast('New Setup Accessory added.');
+    }
+    setAccessoryForm({ icon: '⚡', title: '', price: '', desc: '', imageUrl: '' });
+    setEditingAccessory(null);
+    refreshData();
+  };
+
+  const handleEditAccessory = (item: AccessoryItem) => {
+    setEditingAccessory(item);
+    setAccessoryForm({
+      icon: item.icon || '⚡',
+      title: item.title,
+      price: item.price,
+      desc: item.desc || item.description || '',
+      imageUrl: item.imageUrl || '',
+    });
+  };
+
+  const handleDeleteAccessory = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this setup accessory?')) return;
+    await deleteCMSAccessoryAsync(id);
+    refreshData();
+    showToast('Setup accessory deleted.');
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -600,7 +691,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-[#090206] text-white font-sans overflow-x-hidden">
       {/* Responsive Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:top-6 z-[200] bg-pink-500 text-white font-bold text-xs sm:text-sm px-4 py-3 rounded-xl shadow-[0_0_25px_rgba(255,20,147,0.5)] text-center sm:text-left animate-bounce">
+        <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:top-6 z-[200] bg-pink-500 text-white font-bold text-xs sm:text-sm px-4 py-3 rounded-xl shadow-[0_0_25px_rgba(255,20,147,0.5)] text-center sm:text-left">
           ✓ {toastMessage}
         </div>
       )}
@@ -689,6 +780,18 @@ export default function AdminPage() {
             >
               <span>🚁 Drone Products</span>
               <span className="bg-black/30 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px]">{drones.length}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('accessories')}
+              className={`px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 ${
+                activeTab === 'accessories'
+                  ? 'bg-pink-500 text-white shadow-[0_0_15px_rgba(255,20,147,0.4)]'
+                  : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <span>⚡ Accessories (1:1 Ratio)</span>
+              <span className="bg-black/30 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px]">{accessories.length}</span>
             </button>
 
             <button
@@ -1069,6 +1172,212 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* ── TAB: ACCESSORIES CMS (1:1 Aspect Ratio Images) ──────────────────────── */}
+        {activeTab === 'accessories' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+            {/* Form Column */}
+            <div className="lg:col-span-5 bg-[#16060c] border border-pink-500/30 rounded-2xl p-5 sm:p-6 shadow-xl h-fit">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+                <h3 className="font-display text-lg font-black uppercase text-white tracking-wide">
+                  {editingAccessory ? '✏️ Edit Setup Accessory' : '⚡ Add New Setup Accessory'}
+                </h3>
+                {editingAccessory && (
+                  <span className="font-mono text-[10px] text-pink-300 bg-pink-500/20 px-2 py-0.5 rounded border border-pink-500/30">
+                    Editing ID: {editingAccessory.id}
+                  </span>
+                )}
+              </div>
+
+              <form onSubmit={handleSaveAccessory} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-pink-200 mb-1">
+                    Accessory Title <span className="text-pink-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Intelligent Flight Batteries"
+                    value={accessoryForm.title}
+                    onChange={(e) => setAccessoryForm({ ...accessoryForm, title: e.target.value })}
+                    className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs sm:text-sm focus:outline-none focus:border-pink-400"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-pink-200 mb-1">
+                      Selling Price <span className="text-pink-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. ₹35,000"
+                      value={accessoryForm.price}
+                      onChange={(e) => setAccessoryForm({ ...accessoryForm, price: e.target.value })}
+                      className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs sm:text-sm focus:outline-none focus:border-pink-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-pink-200 mb-1">
+                      Icon / Badge Emoji
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 🔋, ⚡, 🎮, 🛰️"
+                      value={accessoryForm.icon}
+                      onChange={(e) => setAccessoryForm({ ...accessoryForm, icon: e.target.value })}
+                      className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs sm:text-sm focus:outline-none focus:border-pink-400"
+                    />
+                  </div>
+                </div>
+
+                {/* 1:1 Aspect Ratio Square Image Upload Field */}
+                <div>
+                  <label className="block text-xs font-semibold text-pink-200 mb-1">
+                    Square Product Image (1:1 Ratio)
+                  </label>
+                  <div className="space-y-2">
+                    <input
+                      ref={accFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAccImageChange}
+                      className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3 py-2 text-xs text-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-pink-500 file:text-white file:font-bold file:text-xs hover:file:bg-pink-400"
+                    />
+                    <div className="text-center font-mono text-[10px] text-white/40">— OR ENTER DIRECT IMAGE URL —</div>
+                    <input
+                      type="url"
+                      placeholder="https://images.unsplash.com/photo-..."
+                      value={accessoryForm.imageUrl}
+                      onChange={(e) => setAccessoryForm({ ...accessoryForm, imageUrl: e.target.value })}
+                      className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-pink-400"
+                    />
+                  </div>
+
+                  {/* Live 1:1 Square Image Preview Box */}
+                  {accessoryForm.imageUrl && (
+                    <div className="mt-2.5 relative rounded-xl border border-pink-500/30 overflow-hidden w-full aspect-square bg-black/40 flex items-center justify-center max-w-[200px] mx-auto shadow-lg">
+                      <img src={accessoryForm.imageUrl} alt="1:1 Preview" className="w-full h-full object-cover" />
+                      <div className="absolute top-1 left-1 font-mono text-[9px] font-bold bg-pink-500 text-white px-2 py-0.5 rounded shadow">
+                        1:1 Square
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setAccessoryForm({ ...accessoryForm, imageUrl: '' })}
+                        className="absolute top-1 right-1 px-2 py-0.5 bg-red-500/80 text-white rounded text-[10px] font-mono font-bold"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-pink-200 mb-1">Specification Details / Description</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Provide hardware specs, compatibility, and features..."
+                    value={accessoryForm.desc}
+                    onChange={(e) => setAccessoryForm({ ...accessoryForm, desc: e.target.value })}
+                    className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs sm:text-sm focus:outline-none focus:border-pink-400 resize-none"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center gap-3">
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 font-bold text-xs sm:text-sm text-white uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(255,20,147,0.4)] transition hover:scale-[1.02] active:scale-95"
+                  >
+                    {editingAccessory ? 'Save Changes' : '➕ Add Setup Accessory'}
+                  </button>
+                  {editingAccessory && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingAccessory(null);
+                        setAccessoryForm({ icon: '⚡', title: '', price: '', desc: '', imageUrl: '' });
+                      }}
+                      className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm rounded-xl transition"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Accessory Cards Grid View */}
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 h-fit">
+              {accessories.length === 0 ? (
+                <div className="col-span-full text-center py-12 bg-[#16060c] rounded-2xl border border-white/10">
+                  <div className="text-3xl mb-2">⚡</div>
+                  <h4 className="font-bold text-white">No Accessories Added Yet</h4>
+                  <p className="text-xs text-white/60 mt-1">Use the form to add your first 1:1 ratio accessory card!</p>
+                </div>
+              ) : (
+                accessories.map((acc) => (
+                  <div
+                    key={acc.id}
+                    className="bg-[#16060c] border border-rose-500/30 hover:border-pink-400 rounded-2xl p-4 flex flex-col justify-between transition shadow-md relative overflow-hidden group"
+                  >
+                    <div>
+                      {/* 1:1 Aspect Ratio Square Image Frame */}
+                      {acc.imageUrl ? (
+                        <div className="w-full aspect-square rounded-xl overflow-hidden mb-3 bg-black/60 border border-white/10 relative shadow-inner">
+                          <img src={acc.imageUrl} alt={acc.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded text-sm border border-pink-500/30">
+                            {acc.icon || '⚡'}
+                          </div>
+                          <span className="absolute top-2 right-2 font-mono text-[10px] font-black text-pink-300 bg-black/80 backdrop-blur-md border border-pink-500/40 px-2 py-0.5 rounded">
+                            {acc.price}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="w-full aspect-square rounded-xl bg-pink-500/10 border border-pink-500/20 flex flex-col items-center justify-center mb-3">
+                          <span className="text-4xl mb-1">{acc.icon || '⚡'}</span>
+                          <span className="font-mono text-xs font-bold text-pink-300">{acc.price}</span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <h4 className="font-display text-sm font-black uppercase text-white truncate">
+                          {acc.title}
+                        </h4>
+                      </div>
+
+                      <div className="font-display text-lg font-black text-pink-400 mb-2">
+                        {acc.price}
+                      </div>
+
+                      {(acc.desc || acc.description) && (
+                        <p className="text-xs text-white/70 line-clamp-3 leading-relaxed">
+                          {acc.desc || acc.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleEditAccessory(acc)}
+                        className="px-3 py-1 bg-pink-500/20 hover:bg-pink-500/40 text-pink-300 rounded text-xs font-mono font-bold transition"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAccessory(acc.id)}
+                        className="px-3 py-1 bg-red-500/20 hover:bg-red-500/40 text-red-300 rounded text-xs font-mono font-bold transition"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ── TAB 1: ENQUIRIES / FORM SUBMISSIONS ──────────────────────── */}
         {activeTab === 'enquiries' && (
           <div className="space-y-4 sm:space-y-6">
@@ -1330,7 +1639,7 @@ export default function AdminPage() {
                 </div>
 
                 {uploadProgress && (
-                  <div className="flex items-center gap-2 text-xs text-pink-300 bg-pink-500/10 border border-pink-500/30 rounded-xl px-4 py-3 animate-pulse">
+                  <div className="flex items-center gap-2 text-xs text-pink-300 bg-pink-500/10 border border-pink-500/30 rounded-xl px-4 py-3">
                     <span>⏳</span>
                     <span>{uploadProgress}</span>
                   </div>

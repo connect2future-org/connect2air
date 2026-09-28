@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { getCMSDronesAsync, type DroneItem } from '@/utils/cmsStorage';
+import {
+  getCMSDronesAsync,
+  getCMSAccessoriesAsync,
+  type DroneItem,
+  type AccessoryItem,
+} from '@/utils/cmsStorage';
 import FranchiseBrochureModal from '@/components/FranchiseBrochureModal';
 
 const DEFAULT_DRONES: DroneItem[] = [
@@ -116,21 +121,23 @@ const ACCESSORIES = [
 export default function Franchise() {
   const ref = useScrollReveal<HTMLDivElement>({ stagger: 0.08 });
   const [drones, setDrones] = useState<DroneItem[]>(DEFAULT_DRONES);
+  const [accessories, setAccessories] = useState<AccessoryItem[]>([]);
   const [brochureModalOpen, setBrochureModalOpen] = useState(false);
 
   const droneScrollRef = useRef<HTMLDivElement>(null);
   const accScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const loadDrones = async () => {
-      const data = await getCMSDronesAsync();
-      if (data && data.length > 0) {
-        setDrones(data);
-      }
-    };
-    loadDrones();
+    const loadCMSData = async () => {
+      const droneData = await getCMSDronesAsync();
+      if (droneData && droneData.length > 0) setDrones(droneData);
 
-    const handleCMSUpdate = () => loadDrones();
+      const accData = await getCMSAccessoriesAsync();
+      if (accData && accData.length > 0) setAccessories(accData);
+    };
+    loadCMSData();
+
+    const handleCMSUpdate = () => loadCMSData();
     window.addEventListener('c2a_cms_updated', handleCMSUpdate);
     return () => window.removeEventListener('c2a_cms_updated', handleCMSUpdate);
   }, []);
@@ -142,7 +149,7 @@ export default function Franchise() {
   };
 
   return (
-    <section id="franchise" className="relative bg-[var(--color-void)] py-10 sm:py-16 border-t border-rose-500/20 scroll-mt-24 overflow-hidden">
+    <section id="franchise" className="relative bg-[var(--color-void)] pt-10 pb-16 sm:pt-20 sm:pb-28 border-t border-rose-500/20 scroll-mt-24 overflow-hidden">
       {/* Background Glow Orbs */}
       <div className="pointer-events-none absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-pink-500/10 blur-[130px]" />
       <div className="pointer-events-none absolute -right-32 bottom-10 h-96 w-96 rounded-full bg-rose-500/10 blur-[130px]" />
@@ -152,7 +159,7 @@ export default function Franchise() {
         {/* ── Section Header ── */}
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-pink-500/40 bg-pink-500/10 px-4 py-1.5 font-mono text-xs font-bold text-pink-300 uppercase tracking-widest mb-3">
-            <span className="h-2 w-2 rounded-full bg-pink-400 animate-pulse" />
+            <span className="h-2 w-2 rounded-full bg-pink-400" />
             Commercial Drones & Accessories Store
           </div>
 
@@ -237,7 +244,7 @@ export default function Franchise() {
                     )}
                   </div>
 
-                  {/* Header Info */}
+                  {/* Header Info: Title & Tagline */}
                   <div className="p-3 text-center border-b bg-white/5 border-white/10">
                     <h4 className="font-display text-base font-black uppercase text-white tracking-wide leading-snug">
                       {drone.name}
@@ -249,33 +256,34 @@ export default function Franchise() {
                     )}
                   </div>
 
-                  {/* Price & Specs & Description (Pure Details, No buttons inside) */}
-                  <div className="p-4 space-y-3 text-center divide-y divide-white/10 text-xs flex-1 flex flex-col justify-between">
-                    <div>
-                      <span className="text-white/50 text-[10px] block font-mono">Unit Price</span>
-                      <strong className="text-xl font-black text-pink-400 font-display block mt-0.5">
-                        {drone.price}
-                      </strong>
-                    </div>
-
+                  {/* Specs & Description & Unit Price at Bottom */}
+                  <div className="p-4 space-y-3 text-center text-xs flex-1 flex flex-col justify-between">
                     {drone.specs && drone.specs.length > 0 && (
-                      <div className="pt-2.5 space-y-1 text-left flex-1">
+                      <div className="space-y-1.5 text-left flex-1">
                         {drone.specs.map((spec, idx) => (
-                          <div key={idx} className="flex justify-between items-center text-[10px] bg-white/5 px-2 py-0.5 rounded border border-white/5">
-                            <span className="text-white/60 font-mono">{spec.label}</span>
-                            <strong className="text-white font-semibold font-mono">{spec.value}</strong>
+                          <div key={idx} className="flex justify-between items-center text-[10px] bg-white/5 px-2.5 py-1 rounded border border-white/10 font-mono">
+                            <span className="text-white/60">{spec.label}</span>
+                            <strong className="text-white font-semibold">{spec.value}</strong>
                           </div>
                         ))}
                       </div>
                     )}
 
                     {drone.description && (
-                      <div className="pt-2 text-left">
+                      <div className="text-left">
                         <p className="text-[10px] text-white/70 leading-relaxed line-clamp-2">
                           {drone.description}
                         </p>
                       </div>
                     )}
+
+                    {/* Unit Price AT THE BOTTOM */}
+                    <div className="pt-3 border-t border-white/10 text-center">
+                      <span className="text-white/50 text-[10px] block font-mono uppercase tracking-wider">Unit Price</span>
+                      <strong className="text-2xl font-black text-pink-400 font-display block mt-0.5 text-glow">
+                        {drone.price}
+                      </strong>
+                    </div>
                   </div>
                 </div>
               );
@@ -283,11 +291,11 @@ export default function Franchise() {
           </div>
         </div>
 
-        {/* ── 2. Major Accessories (6 Items) Horizontal Slider with Controls ── */}
+        {/* ── 2. Major Accessories Horizontal Slider with Controls (Image 2 Structure) ── */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-display text-lg sm:text-xl font-black uppercase text-white tracking-wide">
-              ⚡ 6 Major Setup Accessories & Add-ons
+              ⚡ Setup Accessories & Add-ons ({accessories.length})
             </h3>
 
             {/* Scroll Arrow Buttons */}
@@ -317,27 +325,62 @@ export default function Franchise() {
             className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 pt-1"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {ACCESSORIES.map((acc) => (
-              <div
-                key={acc.title}
-                className="w-64 sm:w-72 shrink-0 snap-center bg-[#16060c] border border-rose-500/30 hover:border-pink-400 p-4 rounded-2xl flex flex-col justify-between transition shadow-md"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl">{acc.icon}</span>
-                    <span className="font-mono text-[11px] font-black text-pink-400 bg-pink-500/10 border border-pink-500/20 px-2 py-0.5 rounded-lg">
-                      {acc.price}
-                    </span>
+            {accessories.map((acc, idx) => {
+              const defaultAccImgs = [
+                'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=800&h=800&q=80',
+                'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&h=800&q=80',
+                'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=800&h=800&q=80',
+                'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?auto=format&fit=crop&w=800&h=800&q=80',
+                'https://images.unsplash.com/photo-1521405924368-64c5b84bec60?auto=format&fit=crop&w=800&h=800&q=80',
+              ];
+              const displayImg = acc.imageUrl || defaultAccImgs[idx % defaultAccImgs.length];
+
+              return (
+                <div
+                  key={acc.id || acc.title}
+                  className="w-56 sm:w-64 shrink-0 snap-center rounded-xl bg-[#16060c] border border-rose-500/30 hover:border-pink-400 overflow-hidden flex flex-col justify-between transition shadow-lg group"
+                >
+                  {/* Compact Image Frame */}
+                  <div className="w-full h-36 sm:h-40 bg-black/60 overflow-hidden border-b border-white/10 relative shrink-0">
+                    <img
+                      src={displayImg}
+                      alt={acc.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-md border border-pink-500/30 px-2 py-0.5 rounded-lg text-sm shadow-md">
+                      {acc.icon || '⚡'}
+                    </div>
                   </div>
-                  <h4 className="font-display text-sm font-bold text-white uppercase leading-snug">
-                    {acc.title}
-                  </h4>
-                  <p className="text-[11px] text-white/70 mt-2 leading-relaxed font-medium line-clamp-3">
-                    {acc.desc}
-                  </p>
+
+                  {/* Top: Title */}
+                  <div className="p-2.5 text-center border-b bg-white/5 border-white/10">
+                    <h4 className="font-display text-sm font-black uppercase text-white tracking-wide leading-snug">
+                      {acc.title}
+                    </h4>
+                  </div>
+
+                  {/* Price & Description */}
+                  <div className="p-3 space-y-2 text-center text-xs flex-1 flex flex-col justify-between">
+                    {/* Unit Price Section */}
+                    <div>
+                      <span className="text-white/50 text-[9px] block font-mono uppercase tracking-wider">Unit Price</span>
+                      <strong className="text-lg font-black text-pink-400 font-display block mt-0.5 text-glow">
+                        {acc.price}
+                      </strong>
+                    </div>
+
+                    {/* Description */}
+                    {(acc.desc || acc.description) && (
+                      <div className="pt-1.5 border-t border-white/10 text-left">
+                        <div className="bg-white/5 border border-white/10 p-2 rounded-lg text-[9px] font-mono text-white/80 leading-relaxed line-clamp-3">
+                          {acc.desc || acc.description}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -376,5 +419,4 @@ export default function Franchise() {
     </section>
   );
 }
-
 

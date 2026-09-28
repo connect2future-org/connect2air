@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 
 const environments = [
@@ -12,7 +12,8 @@ export default function Experience() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const droneRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const [envIndex, setEnvIndex] = useState(0);
+  const envIndexRef = useRef(0);
+  const zoneRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -26,11 +27,13 @@ export default function Experience() {
           trigger: wrap,
           start: 'top top',
           end: '+=220%',
-          scrub: 0.5,
-          pin: true,
+          scrub: true,
           onUpdate: (self) => {
             const idx = Math.min(environments.length - 1, Math.floor(self.progress * environments.length));
-            setEnvIndex(idx);
+            if (idx !== envIndexRef.current && zoneRef.current) {
+              envIndexRef.current = idx;
+              zoneRef.current.textContent = environments[idx].zone;
+            }
           },
         },
       });
@@ -41,14 +44,14 @@ export default function Experience() {
           trigger: wrap,
           start: 'top top',
           end: '+=220%',
-          scrub: 0.5,
+          scrub: true,
         },
       });
     }, wrap);
     return () => ctx.revert();
   }, []);
 
-  const env = environments[envIndex];
+  const env = environments[0];
 
   return (
     <div id="experience" ref={wrapRef} className="relative h-[100svh] overflow-hidden bg-[var(--color-void-2)]">
@@ -85,7 +88,7 @@ export default function Experience() {
 
         <div className="flex flex-wrap items-end justify-between gap-8">
           <div className="font-mono text-xs uppercase tracking-[0.14em] text-white/50">
-            Now over — <span className="text-white">{env.zone}</span>
+            Now over — <span ref={zoneRef} className="text-white">{env.zone}</span>
           </div>
           <div className="grid grid-cols-3 gap-x-8 gap-y-3 rounded-md border border-white/10 bg-black/40 px-6 py-4 backdrop-blur-sm sm:flex sm:gap-10">
             <Telemetry label="Alt" value={env.alt} />

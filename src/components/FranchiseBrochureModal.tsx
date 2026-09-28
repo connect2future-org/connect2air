@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { saveCMSEnquiry } from '@/utils/cmsStorage';
 import { getApiBaseUrl } from '@/utils/apiBase';
 import { downloadFranchiseBrochure } from '@/utils/generateBrochure';
@@ -32,15 +33,7 @@ export const FranchiseBrochureModal: React.FC<FranchiseBrochureModalProps> = ({ 
   const [submitting, setSubmitting] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
 
-  // Lock body scroll when modal is active
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+  useBodyScrollLock(isOpen);
 
   if (!isOpen) return null;
 
@@ -244,7 +237,7 @@ export const FranchiseBrochureModal: React.FC<FranchiseBrochureModalProps> = ({ 
         ) : (
           /* Download Success State */
           <div className="text-center py-6 space-y-4">
-            <div className="w-16 h-16 bg-pink-500/20 border border-pink-400 text-pink-300 rounded-full flex items-center justify-center mx-auto text-3xl animate-bounce">
+            <div className="w-16 h-16 bg-pink-500/20 border border-pink-400 text-pink-300 rounded-full flex items-center justify-center mx-auto text-3xl">
               ✓
             </div>
             <h3 className="font-display text-xl sm:text-2xl font-black uppercase text-white">
