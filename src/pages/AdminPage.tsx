@@ -127,6 +127,10 @@ export default function AdminPage() {
   });
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [submittingDrone, setSubmittingDrone] = useState(false);
+  const [submittingAccessory, setSubmittingAccessory] = useState(false);
+  const [submittingService, setSubmittingService] = useState(false);
+  const [submittingPricing, setSubmittingPricing] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -225,10 +229,12 @@ export default function AdminPage() {
   // Drone Products Actions
   const handleSaveDrone = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingDrone) return;
     if (!droneForm.name || !droneForm.price) {
       alert('Please fill out Model Name and Price.');
       return;
     }
+    setSubmittingDrone(true);
     try {
       if (editingDrone) {
         await updateCMSDroneAsync(editingDrone.id, droneForm);
@@ -254,9 +260,11 @@ export default function AdminPage() {
       });
       setDroneImageFile(null);
       if (droneFileInputRef.current) droneFileInputRef.current.value = '';
-      refreshData();
+      await refreshData();
     } catch (err: any) {
       alert(`Error saving drone product: ${err?.message || 'Unknown error'}`);
+    } finally {
+      setSubmittingDrone(false);
     }
   };
 
@@ -391,20 +399,28 @@ export default function AdminPage() {
 
   const handleSaveAccessory = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingAccessory) return;
     if (!accessoryForm.title || !accessoryForm.price) {
       alert('Please fill out Accessory Title and Price.');
       return;
     }
-    if (editingAccessory) {
-      await updateCMSAccessoryAsync(editingAccessory.id, accessoryForm);
-      showToast('Accessory updated successfully.');
-    } else {
-      await addCMSAccessoryAsync(accessoryForm);
-      showToast('New Setup Accessory added.');
+    setSubmittingAccessory(true);
+    try {
+      if (editingAccessory) {
+        await updateCMSAccessoryAsync(editingAccessory.id, accessoryForm);
+        showToast('Accessory updated successfully.');
+      } else {
+        await addCMSAccessoryAsync(accessoryForm);
+        showToast('New Setup Accessory added.');
+      }
+      setAccessoryForm({ icon: '⚡', title: '', price: '', desc: '', imageUrl: '' });
+      setEditingAccessory(null);
+      await refreshData();
+    } catch (err: any) {
+      alert(`Error saving setup accessory: ${err?.message || 'Unknown error'}`);
+    } finally {
+      setSubmittingAccessory(false);
     }
-    setAccessoryForm({ icon: '⚡', title: '', price: '', desc: '', imageUrl: '' });
-    setEditingAccessory(null);
-    refreshData();
   };
 
   const handleEditAccessory = (item: AccessoryItem) => {
@@ -1062,9 +1078,10 @@ export default function AdminPage() {
                 <div className="flex gap-3 pt-2">
                   <button
                     type="submit"
-                    className="flex-1 py-3 bg-pink-500 hover:bg-pink-400 font-bold text-xs sm:text-sm text-white rounded-xl shadow-[0_0_20px_rgba(255,20,147,0.4)] transition"
+                    disabled={submittingDrone}
+                    className="flex-1 py-3 bg-pink-500 hover:bg-pink-400 font-bold text-xs sm:text-sm text-white rounded-xl shadow-[0_0_20px_rgba(255,20,147,0.4)] transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {editingDrone ? 'Update Drone Card' : '+ Save Drone Card'}
+                    {submittingDrone ? (editingDrone ? 'Updating Drone...' : 'Saving Drone Card...') : (editingDrone ? 'Update Drone Card' : '+ Save Drone Card')}
                   </button>
 
                   {editingDrone && (
@@ -1299,9 +1316,10 @@ export default function AdminPage() {
                 <div className="pt-2 flex items-center gap-3">
                   <button
                     type="submit"
-                    className="flex-1 py-3 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 font-bold text-xs sm:text-sm text-white uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(255,20,147,0.4)] transition hover:scale-[1.02] active:scale-95"
+                    disabled={submittingAccessory}
+                    className="flex-1 py-3 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 font-bold text-xs sm:text-sm text-white uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(255,20,147,0.4)] transition hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {editingAccessory ? 'Save Changes' : '➕ Add Setup Accessory'}
+                    {submittingAccessory ? (editingAccessory ? 'Saving Changes...' : 'Adding Accessory...') : (editingAccessory ? 'Save Changes' : '➕ Add Setup Accessory')}
                   </button>
                   {editingAccessory && (
                     <button

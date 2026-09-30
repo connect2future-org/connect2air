@@ -92,13 +92,23 @@ router.post('/', async (req, res) => {
     if (!title || !price) {
       return res.status(400).json({ success: false, message: 'Title and price are required.' });
     }
+
+    // Deduplication check: if accessory with exact same title created within last 4 seconds, return existing doc
+    const recentDuplicate = await Accessory.findOne({
+      title: String(title).trim(),
+      createdAt: { $gte: new Date(Date.now() - 4000) },
+    });
+    if (recentDuplicate) {
+      return res.status(200).json({ success: true, data: recentDuplicate });
+    }
+
     if (imageUrl && imageUrl.startsWith('data:image/')) {
       imageUrl = await uploadBase64ToCloudinary(imageUrl);
     }
     const accessory = new Accessory({
       icon: icon || '⚡',
-      title,
-      price,
+      title: String(title).trim(),
+      price: String(price).trim(),
       desc: desc || description || '',
       description: desc || description || '',
       imageUrl: imageUrl || '',
