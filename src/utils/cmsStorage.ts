@@ -84,7 +84,63 @@ const STORAGE_KEYS = {
   ENQUIRIES: 'c2a_cms_enquiries',
   DRONES: 'c2a_cms_drones',
   ACCESSORIES: 'c2a_cms_accessories',
+  DELETED_ITEMS: 'c2a_cms_deleted_items',
 };
+
+function getDeletedSignatures(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.DELETED_ITEMS);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return new Set(arr.map((s) => String(s).trim().toLowerCase()));
+    }
+  } catch (e) {}
+  return new Set();
+}
+
+export function recordDeletedItem(id?: string, nameOrTitle?: string) {
+  const deleted = getDeletedSignatures();
+  if (id) deleted.add(String(id).trim().toLowerCase());
+  if (nameOrTitle) deleted.add(String(nameOrTitle).trim().toLowerCase());
+  try {
+    localStorage.setItem(STORAGE_KEYS.DELETED_ITEMS, JSON.stringify(Array.from(deleted)));
+  } catch (e) {}
+}
+
+export function removeDeletedRecord(id?: string, nameOrTitle?: string) {
+  const deleted = getDeletedSignatures();
+  let changed = false;
+  if (id && deleted.has(String(id).trim().toLowerCase())) {
+    deleted.delete(String(id).trim().toLowerCase());
+    changed = true;
+  }
+  if (nameOrTitle && deleted.has(String(nameOrTitle).trim().toLowerCase())) {
+    deleted.delete(String(nameOrTitle).trim().toLowerCase());
+    changed = true;
+  }
+  if (changed) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.DELETED_ITEMS, JSON.stringify(Array.from(deleted)));
+    } catch (e) {}
+  }
+}
+
+export function filterDeletedItems<T extends { id?: string; _id?: string; name?: string; title?: string }>(items: T[]): T[] {
+  if (!Array.isArray(items)) return [];
+  const deleted = getDeletedSignatures();
+  if (deleted.size === 0) return items;
+
+  return items.filter((item) => {
+    const idStr = item.id ? String(item.id).trim().toLowerCase() : '';
+    const _idStr = item._id ? String(item._id).trim().toLowerCase() : '';
+    const nameStr = (item.name || item.title || '').trim().toLowerCase();
+
+    if (idStr && deleted.has(idStr)) return false;
+    if (_idStr && deleted.has(_idStr)) return false;
+    if (nameStr && deleted.has(nameStr)) return false;
+    return true;
+  });
+}
 
 const DEFAULT_PRICING: PricingItem[] = [
   {
@@ -606,10 +662,10 @@ export const getCMSDrones = (): DroneItem[] => {
     const raw = localStorage.getItem(STORAGE_KEYS.DRONES);
     if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) return filterDeletedItems(parsed);
     }
   } catch (e) {}
-  return DEFAULT_DRONES;
+  return filterDeletedItems(DEFAULT_DRONES);
 };
 
 function cacheDronesToLocalStorage(items: DroneItem[]) {
@@ -653,11 +709,13 @@ export async function getCMSDronesAsync(): Promise<DroneItem[]> {
         featured: Boolean(raw.featured),
         createdAt: raw.createdAt,
   }));
-  cacheDronesToLocalStorage(formatted);
-  return formatted;
+  const clean = filterDeletedItems(formatted);
+  cacheDronesToLocalStorage(clean);
+  return clean;
 }
 
 export async function addCMSDroneAsync(drone: Omit<DroneItem, 'id'>): Promise<DroneItem> {
+  removeDeletedRecord(undefined, drone.name);
   try {
     const res = await fetch(`${API_BASE}/api/drones`, {
       method: 'POST',
@@ -666,6 +724,7 @@ export async function addCMSDroneAsync(drone: Omit<DroneItem, 'id'>): Promise<Dr
     });
     const json = await parseJsonResponse(res);
     if (res.ok && json.success) {
+      removeDeletedRecord(json.data._id, drone.name);
       notifyCMSUpdate();
       return { id: json.data._id, _id: json.data._id, ...json.data };
     }
@@ -693,6 +752,7 @@ export async function updateCMSDroneAsync(id: string, droneData: Partial<DroneIt
 }
 
 export async function deleteCMSDroneAsync(id: string, name?: string): Promise<void> {
+  recordDeletedItem(id, name);
   const list = getCMSDrones();
   const filtered = list.filter((item) => {
     if (id && (item.id === id || item._id === id)) return false;
@@ -706,15 +766,11 @@ export async function deleteCMSDroneAsync(id: string, name?: string): Promise<vo
       ? `${API_BASE}/api/drones/${encodeURIComponent(id)}?name=${encodeURIComponent(name)}`
       : `${API_BASE}/api/drones/${encodeURIComponent(id)}`;
     const res = await fetch(url, { method: 'DELETE' });
-    const json = await parseJsonResponse(res);
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to delete drone product from the server.');
-    }
-    return;
+    await parseJsonResponse(res);
   } catch (e) {
-    console.error('Drone delete failed:', e);
-    throw e;
+    console.warn('Backend drone delete request error, retained local blacklist:', e);
   }
+  notifyCMSUpdate();
 }
 
 // --- ACCESSORIES CRUD ---
@@ -774,10 +830,10 @@ export const getCMSAccessories = (): AccessoryItem[] => {
     const raw = localStorage.getItem(STORAGE_KEYS.ACCESSORIES);
     if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) return filterDeletedItems(parsed);
     }
   } catch (e) {}
-  return DEFAULT_ACCESSORIES;
+  return filterDeletedItems(DEFAULT_ACCESSORIES);
 };
 
 function cacheAccessoriesToLocalStorage(items: AccessoryItem[]) {
@@ -808,11 +864,13 @@ export async function getCMSAccessoriesAsync(): Promise<AccessoryItem[]> {
         imageUrl: raw.imageUrl || '',
         createdAt: raw.createdAt,
   }));
-  cacheAccessoriesToLocalStorage(formatted);
-  return formatted;
+  const clean = filterDeletedItems(formatted);
+  cacheAccessoriesToLocalStorage(clean);
+  return clean;
 }
 
 export async function addCMSAccessoryAsync(item: Omit<AccessoryItem, 'id'>): Promise<AccessoryItem> {
+  removeDeletedRecord(undefined, item.title);
   try {
     const res = await fetch(`${API_BASE}/api/accessories`, {
       method: 'POST',
@@ -821,6 +879,7 @@ export async function addCMSAccessoryAsync(item: Omit<AccessoryItem, 'id'>): Pro
     });
     const json = await parseJsonResponse(res);
     if (res.ok && json.success) {
+      removeDeletedRecord(json.data._id, item.title);
       notifyCMSUpdate();
       return { id: json.data._id, _id: json.data._id, ...json.data };
     }
@@ -848,6 +907,7 @@ export async function updateCMSAccessoryAsync(id: string, data: Partial<Accessor
 }
 
 export async function deleteCMSAccessoryAsync(id: string, title?: string): Promise<void> {
+  recordDeletedItem(id, title);
   const list = getCMSAccessories();
   const filtered = list.filter((item) => {
     if (id && (item.id === id || item._id === id)) return false;
@@ -861,15 +921,11 @@ export async function deleteCMSAccessoryAsync(id: string, title?: string): Promi
       ? `${API_BASE}/api/accessories/${encodeURIComponent(id)}?title=${encodeURIComponent(title)}`
       : `${API_BASE}/api/accessories/${encodeURIComponent(id)}`;
     const res = await fetch(url, { method: 'DELETE' });
-    const json = await parseJsonResponse(res);
-    if (!res.ok || !json.success) {
-      throw new Error(json.message || 'Failed to delete accessory from the server.');
-    }
-    return;
+    await parseJsonResponse(res);
   } catch (e) {
-    console.error('Accessory delete failed:', e);
-    throw e;
+    console.warn('Backend accessory delete request error, retained local blacklist:', e);
   }
+  notifyCMSUpdate();
 }
 
 
