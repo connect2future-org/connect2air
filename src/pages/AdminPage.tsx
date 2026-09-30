@@ -121,6 +121,7 @@ export default function AdminPage() {
   const [accessoryForm, setAccessoryForm] = useState({
     icon: '⚡',
     title: '',
+    tagline: '',
     price: '',
     desc: '',
     imageUrl: '',
@@ -413,7 +414,7 @@ export default function AdminPage() {
         await addCMSAccessoryAsync(accessoryForm);
         showToast('New Setup Accessory added.');
       }
-      setAccessoryForm({ icon: '⚡', title: '', price: '', desc: '', imageUrl: '' });
+      setAccessoryForm({ icon: '⚡', title: '', tagline: '', price: '', desc: '', imageUrl: '' });
       setEditingAccessory(null);
       await refreshData();
     } catch (err: any) {
@@ -428,6 +429,7 @@ export default function AdminPage() {
     setAccessoryForm({
       icon: item.icon || '⚡',
       title: item.title,
+      tagline: item.tagline || '',
       price: item.price,
       desc: item.desc || item.description || '',
       imageUrl: item.imageUrl || '',
@@ -1232,6 +1234,19 @@ export default function AdminPage() {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-xs font-semibold text-pink-200 mb-1">
+                    Tagline / Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. High-density smart battery packs"
+                    value={accessoryForm.tagline}
+                    onChange={(e) => setAccessoryForm({ ...accessoryForm, tagline: e.target.value })}
+                    className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs sm:text-sm focus:outline-none focus:border-pink-400"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-pink-200 mb-1">
@@ -1326,7 +1341,7 @@ export default function AdminPage() {
                       type="button"
                       onClick={() => {
                         setEditingAccessory(null);
-                        setAccessoryForm({ icon: '⚡', title: '', price: '', desc: '', imageUrl: '' });
+                        setAccessoryForm({ icon: '⚡', title: '', tagline: '', price: '', desc: '', imageUrl: '' });
                       }}
                       className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm rounded-xl transition"
                     >

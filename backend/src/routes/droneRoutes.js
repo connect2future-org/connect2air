@@ -113,15 +113,6 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Name and price are required.' });
     }
 
-    // Deduplication check: if drone with exact same name created within last 4 seconds, return existing doc
-    const recentDuplicate = await Drone.findOne({
-      name: String(name).trim(),
-      createdAt: { $gte: new Date(Date.now() - 4000) },
-    });
-    if (recentDuplicate) {
-      return res.status(200).json({ success: true, data: recentDuplicate });
-    }
-
     // Upload base64 image to Cloudinary if provided
     const finalImageUrl = await uploadBase64ToCloudinary(imageUrl);
 

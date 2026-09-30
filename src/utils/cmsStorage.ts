@@ -71,6 +71,7 @@ export interface AccessoryItem {
   _id?: string;
   icon?: string;
   title: string;
+  tagline?: string;
   price: string;
   desc?: string;
   description?: string;
@@ -657,13 +658,11 @@ const DEFAULT_DRONES: DroneItem[] = [
   },
 ];
 
-const droneSubmitLocks = new Map<string, { item: DroneItem; timestamp: number }>();
-
 function deduplicateDrones(items: DroneItem[]): DroneItem[] {
   const seen = new Set<string>();
   const result: DroneItem[] = [];
   for (const item of items) {
-    const key = (item.name || '').trim().toLowerCase();
+    const key = String(item._id || item.id || '').trim();
     if (key && seen.has(key)) continue;
     if (key) seen.add(key);
     result.push(item);
@@ -687,16 +686,7 @@ function cacheDronesToLocalStorage(items: DroneItem[]) {
   try {
     localStorage.setItem(STORAGE_KEYS.DRONES, JSON.stringify(deduplicated));
   } catch (err) {
-    console.warn('LocalStorage quota limit reached, caching trimmed list:', err);
-    try {
-      const lightweight = deduplicated.map((item) => ({
-        ...item,
-        imageUrl: item.imageUrl && item.imageUrl.length > 50000 ? '' : item.imageUrl,
-      }));
-      localStorage.setItem(STORAGE_KEYS.DRONES, JSON.stringify(lightweight));
-    } catch (e) {
-      console.error('Failed to write to localStorage:', e);
-    }
+    console.warn('LocalStorage write warning:', err);
   }
 }
 
@@ -730,13 +720,6 @@ export async function getCMSDronesAsync(): Promise<DroneItem[]> {
 }
 
 export async function addCMSDroneAsync(drone: Omit<DroneItem, 'id'>): Promise<DroneItem> {
-  const normName = (drone.name || '').trim().toLowerCase();
-  const recent = droneSubmitLocks.get(normName);
-  if (recent && Date.now() - recent.timestamp < 4000) {
-    console.warn(`Duplicate drone submit prevented for "${drone.name}"`);
-    return recent.item;
-  }
-
   removeDeletedRecord(undefined, drone.name);
   try {
     const res = await fetch(`${API_BASE}/api/drones`, {
@@ -747,22 +730,17 @@ export async function addCMSDroneAsync(drone: Omit<DroneItem, 'id'>): Promise<Dr
     const json = await parseJsonResponse(res);
     if (res.ok && json.success) {
       removeDeletedRecord(json.data._id, drone.name);
-      notifyCMSUpdate();
       const createdItem: DroneItem = { id: json.data._id, _id: json.data._id, ...json.data };
-      droneSubmitLocks.set(normName, { item: createdItem, timestamp: Date.now() });
+      const currentList = getCMSDrones();
+      const updatedList = [createdItem, ...currentList.filter((i) => i.id !== createdItem.id && i._id !== createdItem._id)];
+      saveCMSDrones(updatedList);
       return createdItem;
     }
   } catch (e) {}
 
   const list = getCMSDrones();
-  const existing = list.find(i => (i.name || '').trim().toLowerCase() === normName);
-  if (existing) {
-    return existing;
-  }
-
-  const newItem: DroneItem = { id: `d_${Date.now()}`, ...drone, createdAt: new Date().toISOString() };
+  const newItem: DroneItem = { id: `d_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`, ...drone, createdAt: new Date().toISOString() };
   saveCMSDrones([newItem, ...list]);
-  droneSubmitLocks.set(normName, { item: newItem, timestamp: Date.now() });
   return newItem;
 }
 
@@ -862,7 +840,7 @@ function deduplicateAccessories(items: AccessoryItem[]): AccessoryItem[] {
   const seen = new Set<string>();
   const result: AccessoryItem[] = [];
   for (const item of items) {
-    const key = (item.title || '').trim().toLowerCase();
+    const key = String(item._id || item.id || '').trim();
     if (key && seen.has(key)) continue;
     if (key) seen.add(key);
     result.push(item);
@@ -904,6 +882,7 @@ export async function getCMSAccessoriesAsync(): Promise<AccessoryItem[]> {
         _id: raw._id,
         icon: raw.icon || '⚡',
         title: raw.title,
+        tagline: raw.tagline || '',
         price: raw.price,
         desc: raw.desc || raw.description || '',
         description: raw.description || raw.desc || '',
@@ -916,13 +895,6 @@ export async function getCMSAccessoriesAsync(): Promise<AccessoryItem[]> {
 }
 
 export async function addCMSAccessoryAsync(item: Omit<AccessoryItem, 'id'>): Promise<AccessoryItem> {
-  const normTitle = (item.title || '').trim().toLowerCase();
-  const recent = accessorySubmitLocks.get(normTitle);
-  if (recent && Date.now() - recent.timestamp < 4000) {
-    console.warn(`Duplicate accessory submit prevented for "${item.title}"`);
-    return recent.item;
-  }
-
   removeDeletedRecord(undefined, item.title);
   try {
     const res = await fetch(`${API_BASE}/api/accessories`, {
@@ -933,22 +905,17 @@ export async function addCMSAccessoryAsync(item: Omit<AccessoryItem, 'id'>): Pro
     const json = await parseJsonResponse(res);
     if (res.ok && json.success) {
       removeDeletedRecord(json.data._id, item.title);
-      notifyCMSUpdate();
       const createdItem: AccessoryItem = { id: json.data._id, _id: json.data._id, ...json.data };
-      accessorySubmitLocks.set(normTitle, { item: createdItem, timestamp: Date.now() });
+      const currentList = getCMSAccessories();
+      const updatedList = [createdItem, ...currentList.filter((i) => i.id !== createdItem.id && i._id !== createdItem._id)];
+      saveCMSAccessories(updatedList);
       return createdItem;
     }
   } catch (e) {}
 
   const list = getCMSAccessories();
-  const existing = list.find(i => (i.title || '').trim().toLowerCase() === normTitle);
-  if (existing) {
-    return existing;
-  }
-
-  const newItem: AccessoryItem = { id: `acc_${Date.now()}`, ...item, createdAt: new Date().toISOString() };
+  const newItem: AccessoryItem = { id: `acc_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`, ...item, createdAt: new Date().toISOString() };
   saveCMSAccessories([newItem, ...list]);
-  accessorySubmitLocks.set(normTitle, { item: newItem, timestamp: Date.now() });
   return newItem;
 }
 

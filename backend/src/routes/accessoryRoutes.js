@@ -93,15 +93,6 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Title and price are required.' });
     }
 
-    // Deduplication check: if accessory with exact same title created within last 4 seconds, return existing doc
-    const recentDuplicate = await Accessory.findOne({
-      title: String(title).trim(),
-      createdAt: { $gte: new Date(Date.now() - 4000) },
-    });
-    if (recentDuplicate) {
-      return res.status(200).json({ success: true, data: recentDuplicate });
-    }
-
     if (imageUrl && imageUrl.startsWith('data:image/')) {
       imageUrl = await uploadBase64ToCloudinary(imageUrl);
     }
