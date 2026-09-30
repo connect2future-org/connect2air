@@ -1,127 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import {
+  getCMSDrones,
   getCMSDronesAsync,
+  getCMSAccessories,
   getCMSAccessoriesAsync,
   type DroneItem,
   type AccessoryItem,
 } from '@/utils/cmsStorage';
 import FranchiseBrochureModal from '@/components/FranchiseBrochureModal';
 
-const DEFAULT_DRONES: DroneItem[] = [
-  {
-    id: 'd1',
-    name: 'DJI Matrice 350 RTK',
-    tagline: 'Flagship Enterprise Inspection & Mapping Drone',
-    badge: 'Enterprise',
-    price: '₹9.8 Lakhs',
-    featured: true,
-    specs: [
-      { label: 'Flight Time', value: '55 Mins' },
-      { label: 'Payload Capacity', value: '2.7 kg Dual/Triple' },
-      { label: 'IP Rating', value: 'IP55 Weatherproof' },
-      { label: 'Transmission', value: '20 km O3 Enterprise' },
-    ],
-  },
-  {
-    id: 'd2',
-    name: 'C2A Mega-Screen 4K',
-    tagline: 'High-Lumen Floating LED Matrix Screen Drone',
-    badge: 'Light-Show',
-    price: '₹4.5 Lakhs',
-    featured: true,
-    specs: [
-      { label: 'Flight Time', value: '25 Mins' },
-      { label: 'Display Brightness', value: '10,000 Nits' },
-      { label: 'Screen Tech', value: 'Full Color LED Matrix' },
-      { label: 'Weather Rating', value: 'IP65 Waterproof' },
-    ],
-  },
-  {
-    id: 'd3',
-    name: 'DJI AGRAS T40',
-    tagline: 'Heavy Spraying & Spreading Agricultural Drone',
-    badge: 'Agricultural',
-    price: '₹12.5 Lakhs',
-    specs: [
-      { label: 'Spray Tank', value: '40 Liter Capacity' },
-      { label: 'Spreading Tank', value: '50 kg Payload' },
-      { label: 'Radar', value: 'Active Phased Array' },
-      { label: 'Flow Rate', value: '12 L/min Atomized' },
-    ],
-  },
-  {
-    id: 'd4',
-    name: 'DJI Air 3S / Mini 5 Pro',
-    tagline: 'Consumer 4K Travel & Lifestyle Aerial Camera',
-    badge: 'Consumer',
-    price: '₹1.2 Lakhs',
-    specs: [
-      { label: 'Flight Time', value: '45 Mins' },
-      { label: 'Sensor', value: '1-inch CMOS 4K/60fps' },
-      { label: 'Weight', value: 'Sub-249g / Ultra-Light' },
-      { label: 'Sensing', value: 'Night-scape Omnidirectional' },
-    ],
-  },
-  {
-    id: 'd5',
-    name: 'C2A Bespoke Swarm Pro',
-    tagline: 'Customizable Swarm Drone & Payload Setup',
-    badge: 'Customizable',
-    price: 'Custom Quote',
-    featured: true,
-    specs: [
-      { label: 'Flight Time', value: '25-40 Mins (Custom)' },
-      { label: 'Payload Capacity', value: '1.0 - 10.0 kg' },
-      { label: 'Choreography', value: 'Tailored 3D Suite' },
-      { label: 'Screen Config', value: 'Bespoke LED Rig' },
-    ],
-  },
-];
-
-const ACCESSORIES = [
-  {
-    icon: '🔋',
-    title: 'Intelligent Flight Batteries',
-    price: '₹35,000',
-    desc: 'High-density smart battery packs with self-heating and battery management system.',
-  },
-  {
-    icon: '⚡',
-    title: 'Fast Chargers & Charging Hubs',
-    price: '₹45,000',
-    desc: 'Multi-battery fast-charging stations capable of concurrent multi-dock refueling.',
-  },
-  {
-    icon: '🎮',
-    title: 'GCS & Remote Controllers',
-    price: '₹85,000',
-    desc: 'Integrated flight control console loaded with Connect2Air 3D choreography & live telemetry.',
-  },
-  {
-    icon: '🛰️',
-    title: 'RTK / PPK Base Stations',
-    price: '₹95,000',
-    desc: 'Centimeter-level precision RTK positioning towers for mapping, inspection, and light shows.',
-  },
-  {
-    icon: '🪂',
-    title: 'Autonomous Parachute & Safety Gear',
-    price: '₹45,000',
-    desc: 'DGCA compliant dual-deployment automatic parachute systems and landing safety gear.',
-  },
-  {
-    icon: '📷',
-    title: 'Gimbals, Thermal & RGB Payloads',
-    price: '₹1,15,000',
-    desc: 'Radiometric thermal cameras, optical zoom gimbals, and high-lumen LED payloads.',
-  },
-];
-
 export default function Franchise() {
   const ref = useScrollReveal<HTMLDivElement>({ stagger: 0.08 });
-  const [drones, setDrones] = useState<DroneItem[]>(DEFAULT_DRONES);
-  const [accessories, setAccessories] = useState<AccessoryItem[]>([]);
+  const [drones, setDrones] = useState<DroneItem[]>(() => getCMSDrones());
+  const [accessories, setAccessories] = useState<AccessoryItem[]>(() => getCMSAccessories());
   const [brochureModalOpen, setBrochureModalOpen] = useState(false);
 
   const droneScrollRef = useRef<HTMLDivElement>(null);
@@ -129,11 +21,19 @@ export default function Franchise() {
 
   useEffect(() => {
     const loadCMSData = async () => {
-      const droneData = await getCMSDronesAsync();
-      if (droneData && droneData.length > 0) setDrones(droneData);
+      try {
+        const droneData = await getCMSDronesAsync();
+        setDrones(droneData);
+      } catch (error) {
+        console.error('Failed to load drones from API:', error);
+      }
 
-      const accData = await getCMSAccessoriesAsync();
-      if (accData && accData.length > 0) setAccessories(accData);
+      try {
+        const accData = await getCMSAccessoriesAsync();
+        setAccessories(accData);
+      } catch (error) {
+        console.error('Failed to load accessories from API:', error);
+      }
     };
     loadCMSData();
 

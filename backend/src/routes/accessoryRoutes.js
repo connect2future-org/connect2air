@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import { v2 as cloudinary } from 'cloudinary';
 import Accessory from '../models/Accessory.js';
 
@@ -75,10 +76,8 @@ const DEFAULT_ACCESSORIES = [
 // GET /api/accessories
 router.get('/', async (_req, res) => {
   try {
-    let items = await Accessory.find().sort({ createdAt: -1 });
-    if (items.length === 0) {
-      items = await Accessory.insertMany(DEFAULT_ACCESSORIES);
-    }
+    res.set('Cache-Control', 'no-store');
+    const items = await Accessory.find().sort({ createdAt: -1 });
     res.json({ success: true, data: items });
   } catch (err) {
     console.error('GET /api/accessories error:', err);
@@ -137,11 +136,37 @@ router.patch('/:id', async (req, res) => {
 // DELETE /api/accessories/:id
 router.delete('/:id', async (req, res) => {
   try {
+    res.set('Cache-Control', 'no-store');
     const { id } = req.params;
-    const accessory = await Accessory.findByIdAndDelete(id);
-    if (!accessory) {
+    const { title } = req.query;
+
+    let deleted = null;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      deleted = await Accessory.findByIdAndDelete(id);
+    }
+
+    if (!deleted && title) {
+      const escapeRegExp = (str) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      deleted = await Accessory.findOneAndDelete({
+        title: { $regex: new RegExp(`^${escapeRegExp(title)}$`, 'i') },
+      });
+    }
+
+    if (!deleted && !mongoose.Types.ObjectId.isValid(id)) {
+      const escapeRegExp = (str) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      deleted = await Accessory.findOneAndDelete({
+        $or: [
+          { title: { $regex: new RegExp(`^${escapeRegExp(id)}$`, 'i') } },
+          { id: id },
+        ],
+      });
+    }
+
+    if (!deleted) {
       return res.status(404).json({ success: false, message: 'Accessory not found.' });
     }
+
     res.json({ success: true, message: 'Accessory deleted successfully.' });
   } catch (err) {
     console.error('DELETE /api/accessories/:id error:', err);

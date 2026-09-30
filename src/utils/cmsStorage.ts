@@ -604,9 +604,9 @@ const DEFAULT_DRONES: DroneItem[] = [
 export const getCMSDrones = (): DroneItem[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.DRONES);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch (e) {}
   return DEFAULT_DRONES;
@@ -635,11 +635,12 @@ export const saveCMSDrones = (items: DroneItem[]) => {
 };
 
 export async function getCMSDronesAsync(): Promise<DroneItem[]> {
-  try {
-    const res = await fetch(`${API_BASE}/api/drones`);
-    const json = await parseJsonResponse(res);
-    if (res.ok && json.success && Array.isArray(json.data)) {
-      const formatted: DroneItem[] = json.data.map((raw: any) => ({
+  const res = await fetch(`${API_BASE}/api/drones`, { cache: 'no-store' });
+  const json = await parseJsonResponse(res);
+  if (!res.ok || !json.success || !Array.isArray(json.data)) {
+    throw new Error(json.message || `Failed to load drones (HTTP ${res.status}).`);
+  }
+  const formatted: DroneItem[] = json.data.map((raw: any) => ({
         id: raw._id || raw.id,
         _id: raw._id,
         name: raw.name,
@@ -651,12 +652,9 @@ export async function getCMSDronesAsync(): Promise<DroneItem[]> {
         specs: Array.isArray(raw.specs) ? raw.specs : [],
         featured: Boolean(raw.featured),
         createdAt: raw.createdAt,
-      }));
-      cacheDronesToLocalStorage(formatted);
-      return formatted;
-    }
-  } catch (e) {}
-  return getCMSDrones();
+  }));
+  cacheDronesToLocalStorage(formatted);
+  return formatted;
 }
 
 export async function addCMSDroneAsync(drone: Omit<DroneItem, 'id'>): Promise<DroneItem> {
@@ -694,15 +692,28 @@ export async function updateCMSDroneAsync(id: string, droneData: Partial<DroneIt
   }
 }
 
-export async function deleteCMSDroneAsync(id: string): Promise<void> {
+export async function deleteCMSDroneAsync(id: string, name?: string): Promise<void> {
+  const list = getCMSDrones();
+  const filtered = list.filter((item) => {
+    if (id && (item.id === id || item._id === id)) return false;
+    if (name && item.name.toLowerCase() === name.toLowerCase()) return false;
+    return true;
+  });
+  cacheDronesToLocalStorage(filtered);
+
   try {
-    const res = await fetch(`${API_BASE}/api/drones/${id}`, { method: 'DELETE' });
-    await parseJsonResponse(res);
-    notifyCMSUpdate();
+    const url = name
+      ? `${API_BASE}/api/drones/${encodeURIComponent(id)}?name=${encodeURIComponent(name)}`
+      : `${API_BASE}/api/drones/${encodeURIComponent(id)}`;
+    const res = await fetch(url, { method: 'DELETE' });
+    const json = await parseJsonResponse(res);
+    if (!res.ok || !json.success) {
+      throw new Error(json.message || 'Failed to delete drone product from the server.');
+    }
+    return;
   } catch (e) {
-    const list = getCMSDrones();
-    const filtered = list.filter((item) => item.id !== id);
-    saveCMSDrones(filtered);
+    console.error('Drone delete failed:', e);
+    throw e;
   }
 }
 
@@ -761,12 +772,11 @@ const DEFAULT_ACCESSORIES: AccessoryItem[] = [
 export const getCMSAccessories = (): AccessoryItem[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.ACCESSORIES);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch (e) {}
-  localStorage.setItem(STORAGE_KEYS.ACCESSORIES, JSON.stringify(DEFAULT_ACCESSORIES));
   return DEFAULT_ACCESSORIES;
 };
 
@@ -782,12 +792,12 @@ export const saveCMSAccessories = (items: AccessoryItem[]) => {
 };
 
 export async function getCMSAccessoriesAsync(): Promise<AccessoryItem[]> {
-  try {
-    const res = await fetch(`${API_BASE}/api/accessories`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await parseJsonResponse(res);
-    if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-      const formatted: AccessoryItem[] = json.data.map((raw: any) => ({
+  const res = await fetch(`${API_BASE}/api/accessories`, { cache: 'no-store' });
+  const json = await parseJsonResponse(res);
+  if (!res.ok || !json.success || !Array.isArray(json.data)) {
+    throw new Error(json.message || `Failed to load accessories (HTTP ${res.status}).`);
+  }
+  const formatted: AccessoryItem[] = json.data.map((raw: any) => ({
         id: raw._id || raw.id,
         _id: raw._id,
         icon: raw.icon || '⚡',
@@ -797,12 +807,9 @@ export async function getCMSAccessoriesAsync(): Promise<AccessoryItem[]> {
         description: raw.description || raw.desc || '',
         imageUrl: raw.imageUrl || '',
         createdAt: raw.createdAt,
-      }));
-      cacheAccessoriesToLocalStorage(formatted);
-      return formatted;
-    }
-  } catch (e) {}
-  return getCMSAccessories();
+  }));
+  cacheAccessoriesToLocalStorage(formatted);
+  return formatted;
 }
 
 export async function addCMSAccessoryAsync(item: Omit<AccessoryItem, 'id'>): Promise<AccessoryItem> {
@@ -840,15 +847,28 @@ export async function updateCMSAccessoryAsync(id: string, data: Partial<Accessor
   }
 }
 
-export async function deleteCMSAccessoryAsync(id: string): Promise<void> {
+export async function deleteCMSAccessoryAsync(id: string, title?: string): Promise<void> {
+  const list = getCMSAccessories();
+  const filtered = list.filter((item) => {
+    if (id && (item.id === id || item._id === id)) return false;
+    if (title && item.title.toLowerCase() === title.toLowerCase()) return false;
+    return true;
+  });
+  cacheAccessoriesToLocalStorage(filtered);
+
   try {
-    const res = await fetch(`${API_BASE}/api/accessories/${id}`, { method: 'DELETE' });
-    await parseJsonResponse(res);
-    notifyCMSUpdate();
+    const url = title
+      ? `${API_BASE}/api/accessories/${encodeURIComponent(id)}?title=${encodeURIComponent(title)}`
+      : `${API_BASE}/api/accessories/${encodeURIComponent(id)}`;
+    const res = await fetch(url, { method: 'DELETE' });
+    const json = await parseJsonResponse(res);
+    if (!res.ok || !json.success) {
+      throw new Error(json.message || 'Failed to delete accessory from the server.');
+    }
+    return;
   } catch (e) {
-    const list = getCMSAccessories();
-    const filtered = list.filter((item) => item.id !== id);
-    saveCMSAccessories(filtered);
+    console.error('Accessory delete failed:', e);
+    throw e;
   }
 }
 

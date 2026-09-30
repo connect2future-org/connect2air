@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Pricing from '../models/Pricing.js';
 
 const router = express.Router();

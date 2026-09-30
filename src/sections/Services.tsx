@@ -53,8 +53,8 @@ export default function Services() {
     const loadData = async () => {
       const servicesData = await getCMSServicesAsync();
       const pricingData = await getCMSPricingAsync();
-      if (servicesData && servicesData.length > 0) setServicesList(servicesData);
-      if (pricingData && pricingData.length > 0) setPricingList(pricingData);
+      if (servicesData) setServicesList(servicesData);
+      if (pricingData) setPricingList(pricingData);
     };
     loadData();
     window.addEventListener('c2a_cms_updated', loadData);

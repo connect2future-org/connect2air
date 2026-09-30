@@ -96,10 +96,8 @@ const DEFAULT_DRONES = [
 // GET /api/drones — List all drones
 router.get('/', async (_req, res) => {
   try {
-    let items = await Drone.find().sort({ createdAt: -1 });
-    if (items.length === 0) {
-      items = await Drone.insertMany(DEFAULT_DRONES);
-    }
+    res.set('Cache-Control', 'no-store');
+    const items = await Drone.find().sort({ createdAt: -1 });
     res.json({ success: true, data: items });
   } catch (err) {
     console.error('Failed to fetch drones:', err);
@@ -174,12 +172,37 @@ router.patch('/:id', async (req, res) => {
 // DELETE /api/drones/:id — Delete drone product card
 router.delete('/:id', async (req, res) => {
   try {
+    res.set('Cache-Control', 'no-store');
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.json({ success: true, message: 'Non-Mongo product card cleared.' });
+    const { name } = req.query;
+
+    let deleted = null;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      deleted = await Drone.findByIdAndDelete(id);
     }
-    const deleted = await Drone.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ success: false, message: 'Drone product not found.' });
+
+    if (!deleted && name) {
+      const escapeRegExp = (str) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      deleted = await Drone.findOneAndDelete({
+        name: { $regex: new RegExp(`^${escapeRegExp(name)}$`, 'i') },
+      });
+    }
+
+    if (!deleted && !mongoose.Types.ObjectId.isValid(id)) {
+      const escapeRegExp = (str) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      deleted = await Drone.findOneAndDelete({
+        $or: [
+          { name: { $regex: new RegExp(`^${escapeRegExp(id)}$`, 'i') } },
+          { id: id },
+        ],
+      });
+    }
+
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: 'Drone product not found.' });
+    }
+
     res.json({ success: true, message: 'Drone product deleted.' });
   } catch (err) {
     console.error('Failed to delete drone product:', err);

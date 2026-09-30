@@ -206,12 +206,20 @@ export default function AdminPage() {
     setMediaList(mediaItems);
 
     // 5. Drone Products (MongoDB Atlas / Local fallback)
-    const droneItems = await getCMSDronesAsync();
-    setDrones(droneItems);
+    try {
+      const droneItems = await getCMSDronesAsync();
+      setDrones(droneItems);
+    } catch (err) {
+      console.error('Failed to load drones from API:', err);
+    }
 
     // 6. Accessories Store (MongoDB Atlas / Local fallback)
-    const accItems = await getCMSAccessoriesAsync();
-    setAccessories(accItems);
+    try {
+      const accItems = await getCMSAccessoriesAsync();
+      setAccessories(accItems);
+    } catch (err) {
+      console.error('Failed to load accessories from API:', err);
+    }
   };
 
   // Drone Products Actions
@@ -270,11 +278,11 @@ export default function AdminPage() {
     window.scrollTo({ top: 300, behavior: 'smooth' });
   };
 
-  const handleDeleteDrone = async (id: string) => {
+  const handleDeleteDrone = async (id: string, name?: string) => {
     if (!confirm('Are you sure you want to delete this drone product card?')) return;
     try {
-      await deleteCMSDroneAsync(id);
-      refreshData();
+      await deleteCMSDroneAsync(id, name);
+      setDrones((prev) => prev.filter((item) => item.id !== id && item._id !== id && (!name || item.name !== name)));
       showToast('Drone product card deleted.');
     } catch (err: any) {
       alert(`Delete failed: ${err?.message || 'Unknown error'}`);
@@ -410,11 +418,15 @@ export default function AdminPage() {
     });
   };
 
-  const handleDeleteAccessory = async (id: string) => {
+  const handleDeleteAccessory = async (id: string, title?: string) => {
     if (!confirm('Are you sure you want to delete this setup accessory?')) return;
-    await deleteCMSAccessoryAsync(id);
-    refreshData();
-    showToast('Setup accessory deleted.');
+    try {
+      await deleteCMSAccessoryAsync(id, title);
+      setAccessories((prev) => prev.filter((item) => item.id !== id && item._id !== id && (!title || item.title !== title)));
+      showToast('Setup accessory deleted.');
+    } catch (err: any) {
+      alert(`Delete failed: ${err?.message || 'Unknown error'}`);
+    }
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -1115,7 +1127,7 @@ export default function AdminPage() {
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDeleteDrone(drone.id)}
+                            onClick={() => handleDeleteDrone(drone._id || drone.id, drone.name)}
                             className="px-2.5 py-1 bg-red-500/20 hover:bg-red-500/40 text-red-300 rounded text-xs font-mono font-bold transition"
                           >
                             Del
@@ -1365,7 +1377,7 @@ export default function AdminPage() {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteAccessory(acc.id)}
+                        onClick={() => handleDeleteAccessory(acc._id || acc.id, acc.title)}
                         className="px-3 py-1 bg-red-500/20 hover:bg-red-500/40 text-red-300 rounded text-xs font-mono font-bold transition"
                       >
                         Delete
