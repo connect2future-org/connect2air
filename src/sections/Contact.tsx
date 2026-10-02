@@ -1,33 +1,33 @@
 import { useState, type FormEvent } from 'react';
 import { contact } from '@/data/siteData';
-import { MailIcon, PhoneIcon, WhatsAppIcon, SocialIcon } from '@/components/Icons';
 import { saveCMSEnquiry } from '@/utils/cmsStorage';
 import { getApiBaseUrl } from '@/utils/apiBase';
-
-const fields = [
-  { name: 'name', label: 'Your name', type: 'text', placeholder: 'Jane Smith' },
-  { name: 'email', label: 'Work email', type: 'email', placeholder: 'jane@company.com' },
-  { name: 'phone', label: 'Phone number', type: 'tel', placeholder: '+91 00000 00000' },
-  { name: 'company', label: 'Company', type: 'text', placeholder: 'Your company' },
-] as const;
+import { InstagramIcon, LinkedInIcon, WhatsAppIcon, MailIcon, PhoneIcon } from '@/components/Icons';
 
 export default function Contact() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    message: '',
+  });
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!formData.name.trim() || !formData.phone.trim()) return;
+
     setStatus('sending');
     const apiBase = getApiBaseUrl();
 
-    const form = event.currentTarget;
-    const values = Object.fromEntries(new FormData(form)) as any;
     const payload = {
-      name: values.name || '',
-      email: values.email || '',
-      phone: values.phone || '',
-      company: values.company || '',
-      message: values.message || '',
-      source: 'Contact Page Form',
+      name: formData.name.trim(),
+      email: formData.email.trim() || 'N/A',
+      phone: formData.phone.trim(),
+      company: formData.company.trim() || 'N/A',
+      message: formData.message.trim() || 'General Enquiry',
+      source: 'Website Contact Section',
     };
 
     let backendId = undefined;
@@ -47,147 +47,400 @@ export default function Contact() {
     }
 
     saveCMSEnquiry(payload, backendId);
-    form.reset();
+    setFormData({ name: '', email: '', phone: '', company: '', message: '' });
     setStatus('sent');
   };
 
   return (
-    <section id="contact" className="relative overflow-hidden bg-[var(--color-panel)] py-10 sm:py-14">
-      <div className="pointer-events-none absolute -right-32 top-20 h-96 w-96 rounded-full bg-pink-500 opacity-[0.12] blur-[120px]" />
-      <div className="container-page relative">
-        <div className="mb-8 max-w-2xl sm:mb-10">
-          <div className="eyebrow mb-3 text-pink-300 font-bold uppercase tracking-widest">Contact Us</div>
-          <h1 className="font-display text-5xl font-black uppercase leading-[0.98] tracking-tight sm:text-7xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
-            Let&apos;s make an
-            <span className="block text-[var(--color-signal-2)] text-glow drop-shadow-[0_0_20px_rgba(255,77,109,0.7)]">impression.</span>
-          </h1>
-          <p className="mt-4 max-w-lg text-lg font-medium text-white/90 leading-relaxed">
-            Tell us about the moment you want to own. We&apos;ll help shape the right aerial experience for it.
-          </p>
-        </div>
+    <section id="contact" className="relative bg-[#070208] pt-12 pb-16 sm:pt-16 sm:pb-24 border-t border-pink-500/20 overflow-hidden scroll-mt-24">
+      {/* Ambient Neon Background Glows */}
+      <div className="pointer-events-none absolute -left-40 top-1/4 h-[500px] w-[500px] rounded-full bg-pink-600/15 blur-[160px]" />
+      <div className="pointer-events-none absolute -right-40 bottom-10 h-[500px] w-[500px] rounded-full bg-purple-600/15 blur-[160px]" />
 
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_0.85fr] xl:gap-12">
-          <form onSubmit={submit} className="rounded-2xl border border-rose-500/30 bg-[#16060c] p-6 sm:p-9 shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
-            <div className="grid gap-6 sm:grid-cols-2">
-              {fields.map((field) => (
-                <label key={field.name}>
-                  <span className="eyebrow mb-2 block text-pink-200 font-semibold">{field.label}</span>
-                  <input
-                    required={field.name !== 'company'}
-                    name={field.name}
-                    type={field.type}
-                    placeholder={field.placeholder}
-                    className="w-full border-b border-rose-500/40 bg-white/5 px-3 py-2.5 text-sm text-white font-medium outline-none transition-all placeholder:text-white/40 focus:border-pink-300 focus:bg-white/10 rounded-t"
-                  />
-                </label>
-              ))}
-              <label className="sm:col-span-2">
-                <span className="eyebrow mb-2 block text-pink-200 font-semibold">What are you planning?</span>
-                <textarea
-                  required
-                  name="message"
-                  rows={4}
-                  placeholder="Event, city, date and what you want people to see."
-                  className="w-full resize-none border-b border-rose-500/40 bg-white/5 px-3 py-2.5 text-sm text-white font-medium outline-none transition-all placeholder:text-white/40 focus:border-pink-300 focus:bg-white/10 rounded-t"
-                />
-              </label>
+      <div className="container-page relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
+        
+        {/* Main 3-Column Grid Layout matching reference image */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7 items-start">
+          
+          {/* ── LEFT COLUMN (Brand Headline & Value Propositions) ── */}
+          <div className="lg:col-span-3 flex flex-col justify-between h-full">
+            <div>
+              {/* Eyebrow Badge */}
+              <div className="inline-flex items-center gap-2 font-mono text-[11px] font-bold text-pink-300 uppercase tracking-widest mb-3">
+                <span className="h-2 w-2 rounded-full bg-pink-400 animate-pulse" />
+                GET IN TOUCH
+              </div>
+
+              {/* Main Headline */}
+              <h2 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight leading-[0.95] text-white mb-4">
+                LET&apos;S <br />
+                CREATE <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-pink-500 to-rose-400 drop-shadow-[0_0_25px_rgba(255,20,147,0.7)]">
+                  SKY-HIGH
+                </span> <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-pink-500 to-rose-400 drop-shadow-[0_0_25px_rgba(255,20,147,0.7)]">
+                  BRANDS
+                </span>
+              </h2>
+
+              <p className="text-xs sm:text-sm text-white/75 leading-relaxed font-medium mb-6 max-w-xs">
+                Have a project, event or brand campaign in mind? We&apos;re here to help you shape the right aerial experience for it.
+              </p>
+
+              {/* 3 Feature Badges */}
+              <div className="space-y-4">
+                {/* Feature 1: Quick Response */}
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-pink-500/15 border border-pink-500/40 text-pink-300 flex items-center justify-center text-xs shrink-0 shadow-[0_0_12px_rgba(255,20,147,0.3)] mt-0.5">
+                    ⚡
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wide">Quick Response</h4>
+                    <p className="text-[11px] text-white/60 leading-tight">We usually reply within 24 hours</p>
+                  </div>
+                </div>
+
+                {/* Feature 2: Confidential */}
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-pink-500/15 border border-pink-500/40 text-pink-300 flex items-center justify-center text-xs shrink-0 shadow-[0_0_12px_rgba(255,20,147,0.3)] mt-0.5">
+                    🛡️
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wide">Confidential</h4>
+                    <p className="text-[11px] text-white/60 leading-tight">Your ideas and information are safe with us</p>
+                  </div>
+                </div>
+
+                {/* Feature 3: Custom Solutions */}
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-pink-500/15 border border-pink-500/40 text-pink-300 flex items-center justify-center text-xs shrink-0 shadow-[0_0_12px_rgba(255,20,147,0.3)] mt-0.5">
+                    👥
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wide">Custom Solutions</h4>
+                    <p className="text-[11px] text-white/60 leading-tight">Tailored to your event or campaign</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <button disabled={status === 'sending'} type="submit" data-cursor="hover" className="rounded-full bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 px-7 py-3.5 font-mono text-xs font-bold uppercase tracking-[0.15em] text-white shadow-[0_0_20px_rgba(255,42,85,0.4)] transition-all hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60">
-                {status === 'sending' ? 'Sending…' : 'Send enquiry →'}
-              </button>
+
+            <div className="pt-8">
+              <span className="text-[10px] font-mono text-white/40 tracking-widest uppercase">
+                — BRANDS THAT FLY HIGHER
+              </span>
+            </div>
+          </div>
+
+
+          {/* ── CENTER COLUMN (Send Us an Enquiry Form Card) ── */}
+          <div className="lg:col-span-5">
+            <div className="bg-[#0f040b]/90 border-2 border-pink-500/50 rounded-3xl p-5 sm:p-7 shadow-[0_0_50px_rgba(255,20,147,0.35)] backdrop-blur-xl relative">
+              
+              {/* Card Header */}
+              <div className="flex items-center gap-3 mb-5 pb-4 border-b border-pink-500/20">
+                <div className="w-10 h-10 rounded-2xl bg-pink-500/20 border border-pink-400/40 text-pink-300 flex items-center justify-center text-xl shrink-0 shadow-inner">
+                  ✉️
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-base sm:text-lg text-white tracking-wide leading-snug">
+                    Send Us an Enquiry
+                  </h3>
+                  <p className="text-[11px] text-white/60 mt-0.5">
+                    Fill in the details and our team will get back to you shortly.
+                  </p>
+                </div>
+              </div>
+
+              {/* Enquiry Form */}
+              <form onSubmit={submit} className="space-y-3.5">
+                {/* 2x2 Grid Inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Your Name */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-white/90 mb-1">
+                      Your Name <span className="text-pink-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-white/40">👤</span>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Jane Smith"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full bg-[#180713] border border-pink-500/20 focus:border-pink-400 rounded-xl pl-8 pr-3 py-2.5 text-xs text-white placeholder:text-white/30 focus:outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Work Email */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-white/90 mb-1">
+                      Work Email <span className="text-pink-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-white/40">✉️</span>
+                      <input
+                        type="email"
+                        required
+                        placeholder="jane@company.com"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="w-full bg-[#180713] border border-pink-500/20 focus:border-pink-400 rounded-xl pl-8 pr-3 py-2.5 text-xs text-white placeholder:text-white/30 focus:outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Phone Number */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-white/90 mb-1">
+                      Phone Number <span className="text-pink-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-white/40">📞</span>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="+91 90000 00000"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="w-full bg-[#180713] border border-pink-500/20 focus:border-pink-400 rounded-xl pl-8 pr-3 py-2.5 text-xs text-white placeholder:text-white/30 focus:outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Company */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-white/90 mb-1">
+                      Company
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-white/40">🏢</span>
+                      <input
+                        type="text"
+                        placeholder="Your company"
+                        value={formData.company}
+                        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                        className="w-full bg-[#180713] border border-pink-500/20 focus:border-pink-400 rounded-xl pl-8 pr-3 py-2.5 text-xs text-white placeholder:text-white/30 focus:outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Textarea Field */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-white/90 mb-1">
+                    What Are You Planning? <span className="text-pink-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-3 text-xs text-white/40">📋</span>
+                    <textarea
+                      required
+                      rows={3}
+                      maxLength={300}
+                      placeholder="Event, city, date and what you want people to see..."
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      className="w-full bg-[#180713] border border-pink-500/20 focus:border-pink-400 rounded-xl pl-8 pr-3 pt-2.5 pb-2 text-xs text-white placeholder:text-white/30 focus:outline-none transition-colors resize-none"
+                    />
+                  </div>
+                  <div className="text-[10px] font-mono text-white/40 text-right mt-0.5">
+                    {formData.message.length}/300
+                  </div>
+                </div>
+
+                {/* Action Buttons Row */}
+                <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                  <button
+                    type="submit"
+                    disabled={status === 'sending'}
+                    data-cursor="cta"
+                    className="w-full sm:w-auto flex-1 px-6 py-3 rounded-full bg-gradient-to-r from-pink-500 via-rose-600 to-pink-500 hover:from-pink-400 hover:to-rose-500 text-white font-bold text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(255,20,147,0.4)] transition hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    <span>{status === 'sending' ? 'Sending...' : 'SEND ENQUIRY'}</span>
+                    <span>→</span>
+                  </button>
+
+                  <a
+                    href={contact.whatsapp}
+                    target="_blank"
+                    rel="noreferrer"
+                    data-cursor="hover"
+                    className="w-full sm:w-auto px-5 py-3 rounded-full bg-black/90 hover:bg-white/10 border border-pink-500/40 text-white font-bold text-xs uppercase tracking-wider transition hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <span>💬 CHAT ON WHATSAPP</span>
+                  </a>
+                </div>
+
+                {status === 'sent' && (
+                  <p role="status" className="text-xs font-mono font-bold text-pink-300 text-center pt-1">
+                    ✓ Thanks! Your enquiry has been received. We will get back to you shortly.
+                  </p>
+                )}
+              </form>
+
+            </div>
+          </div>
+
+
+          {/* ── RIGHT COLUMN (Contact Cards, Social Row & Location Map) ── */}
+          <div className="lg:col-span-4 space-y-3.5">
+            
+            {/* 1. 3 Quick Contact Info Cards */}
+            <div className="space-y-2.5">
+              {/* EMAIL US */}
+              <a
+                href={`mailto:${contact.email}`}
+                className="bg-[#0f040b]/90 border border-pink-500/25 rounded-2xl p-3 flex items-center justify-between hover:border-pink-400 transition-colors group shadow-md"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-pink-500/20 border border-pink-400/40 text-pink-300 flex items-center justify-center text-xs shrink-0 group-hover:scale-110 transition-transform shadow-[0_0_10px_rgba(255,20,147,0.3)]">
+                    <MailIcon className="w-4 h-4 text-pink-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-mono font-bold text-white/70 uppercase tracking-wider">EMAIL US</div>
+                    <div className="text-xs font-bold text-white leading-tight">{contact.email}</div>
+                    <div className="text-[10px] text-white/40 leading-tight mt-0.5">We&apos;ll get back to you soon</div>
+                  </div>
+                </div>
+                <span className="text-xs text-white/40 group-hover:text-pink-400 transition-colors pr-1">↗</span>
+              </a>
+
+              {/* CALL US */}
+              <a
+                href={`tel:${contact.phone.replace(/\s/g, '')}`}
+                className="bg-[#0f040b]/90 border border-pink-500/25 rounded-2xl p-3 flex items-center justify-between hover:border-pink-400 transition-colors group shadow-md"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-pink-500/20 border border-pink-400/40 text-pink-300 flex items-center justify-center text-xs shrink-0 group-hover:scale-110 transition-transform shadow-[0_0_10px_rgba(255,20,147,0.3)]">
+                    <PhoneIcon className="w-4 h-4 text-pink-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-mono font-bold text-white/70 uppercase tracking-wider">CALL US</div>
+                    <div className="text-xs font-bold text-white leading-tight">{contact.phone}</div>
+                    <div className="text-[10px] text-white/40 leading-tight mt-0.5">Mon - Sat (10 AM - 7 PM)</div>
+                  </div>
+                </div>
+                <span className="text-xs text-white/40 group-hover:text-pink-400 transition-colors pr-1">↗</span>
+              </a>
+
+              {/* WHATSAPP */}
               <a
                 href={contact.whatsapp}
                 target="_blank"
                 rel="noreferrer"
-                data-cursor="hover"
-                className="inline-flex items-center gap-2.5 rounded-full border border-emerald-500/60 bg-emerald-500/10 px-6 py-3.5 font-mono text-xs font-bold uppercase tracking-[0.15em] text-emerald-300 transition-all hover:bg-emerald-500/20 hover:scale-105 shadow-[0_0_15px_rgba(37,211,102,0.3)]"
+                className="bg-[#0f040b]/90 border border-emerald-500/30 rounded-2xl p-3 flex items-center justify-between hover:border-emerald-400 transition-colors group shadow-md"
               >
-                <WhatsAppIcon className="h-4 w-4 fill-current text-[#25D366]" />
-                <span>Chat on WhatsApp</span>
-              </a>
-              {status === 'sent' && <span role="status" className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-pink-300">Thanks — we&apos;ll be in touch.</span>}
-              {status === 'error' && <span role="alert" className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-red-300">Couldn&apos;t send your enquiry. Please try again.</span>}
-            </div>
-          </form>
-
-          <div className="flex flex-col gap-5">
-            <div className="grid gap-px overflow-hidden rounded-xl border border-white/20 bg-white/10 sm:grid-cols-3 shadow-lg">
-              <a href={`mailto:${contact.email}`} className="bg-[#19070e] p-4 transition-all hover:bg-white/[0.08] group flex flex-col justify-between">
-                <div className="eyebrow mb-2 flex items-center gap-2.5 text-white font-semibold">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-red-500/60 bg-red-500/25 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-transform duration-300 group-hover:scale-110">
-                    <MailIcon className="h-4 w-4 text-red-400" />
-                  </span>
-                  <span className="text-white font-bold">Email us</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-400 flex items-center justify-center text-xs shrink-0 group-hover:scale-110 transition-transform shadow-[0_0_10px_rgba(37,211,102,0.3)]">
+                    <WhatsAppIcon className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">WHATSAPP</div>
+                    <div className="text-xs font-bold text-white leading-tight">{contact.phone}</div>
+                    <div className="text-[10px] text-white/40 leading-tight mt-0.5">Chat with our team instantly</div>
+                  </div>
                 </div>
-                <div className="text-xs font-bold text-white truncate">{contact.email}</div>
-              </a>
-              <a href={`tel:${contact.phone.replace(/\s/g, '')}`} className="bg-[#19070e] p-4 transition-all hover:bg-white/[0.08] group flex flex-col justify-between">
-                <div className="eyebrow mb-2 flex items-center gap-2.5 text-white font-semibold">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-pink-400/60 bg-pink-500/25 text-pink-300 shadow-[0_0_15px_rgba(255,77,109,0.4)] transition-transform duration-300 group-hover:scale-110">
-                    <PhoneIcon className="h-4 w-4 text-pink-300" />
-                  </span>
-                  <span className="text-white font-bold">Call us</span>
-                </div>
-                <div className="text-xs font-bold text-white">{contact.phone}</div>
-              </a>
-              <a href={contact.whatsapp} target="_blank" rel="noreferrer" className="bg-[#19070e] p-4 transition-all hover:bg-white/[0.08] group flex flex-col justify-between">
-                <div className="eyebrow mb-2 flex items-center gap-2.5 text-emerald-300 font-semibold">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-400/60 bg-emerald-500/25 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-transform duration-300 group-hover:scale-110">
-                    <WhatsAppIcon className="h-4 w-4 text-emerald-400 fill-current" />
-                  </span>
-                  <span className="text-emerald-300 font-bold">WhatsApp</span>
-                </div>
-                <div className="text-xs font-bold text-white flex items-center gap-1">
-                  <span>{contact.phone}</span>
-                </div>
+                <span className="text-xs text-white/40 group-hover:text-emerald-400 transition-colors pr-1">↗</span>
               </a>
             </div>
 
-            {/* Social media icons implemented directly above the map in a single clean row */}
-            <div className="rounded-xl border border-white/20 bg-[#19070e] p-4 sm:p-5 shadow-lg">
-              <div className="eyebrow mb-3 text-pink-300 font-bold uppercase tracking-widest text-xs">Connect on Social</div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-                {contact.social.map((s) => {
-                  const brandBadgeStyles = 
-                    s.label === 'Instagram' ? 'border-pink-500/60 bg-pink-500/25 text-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.4)]' :
-                    s.label === 'LinkedIn' ? 'border-sky-400/60 bg-sky-500/25 text-sky-300 shadow-[0_0_15px_rgba(56,189,248,0.4)]' :
-                    s.label === 'WhatsApp' ? 'border-emerald-400/60 bg-emerald-500/25 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]' :
-                    'border-red-500/60 bg-red-500/25 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.4)]';
+            {/* 2. Connect on Social Media Card */}
+            <div className="bg-[#0f040b]/90 border border-pink-500/30 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 shadow-[0_0_20px_rgba(255,20,147,0.15)]">
+              <div>
+                <h4 className="text-xs font-bold text-white tracking-wide">
+                  Connect on Social Media
+                </h4>
+                <p className="text-[10px] text-white/60 leading-tight mt-0.5 max-w-[200px]">
+                  Follow us for updates, event highlights and the latest aerial advertising ideas.
+                </p>
+              </div>
 
-                  return (
-                    <a
-                      key={s.label}
-                      href={s.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={s.label}
-                      title={s.label}
-                      data-cursor="hover"
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-2.5 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-white transition-all hover:border-cyan-300 hover:bg-white/20 hover:scale-105 group shadow-md w-full"
-                    >
-                      <span className={`flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full border transition-transform duration-300 group-hover:scale-110 ${brandBadgeStyles}`}>
-                        <SocialIcon label={s.label} className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      </span>
-                      <span className="font-extrabold truncate">{s.label}</span>
-                    </a>
-                  );
-                })}
+              {/* 4 Circular Social Icon Buttons */}
+              <div className="flex items-center gap-2.5 shrink-0">
+                {/* Instagram */}
+                <a
+                  href={contact.social.find(s => s.label === 'Instagram')?.href || 'https://www.instagram.com/_connect2air'}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Instagram"
+                  className="w-10 h-10 rounded-full border border-[#d52976] bg-transparent flex items-center justify-center transition-all hover:scale-110 shadow-[0_0_12px_rgba(213,41,118,0.5)] hover:shadow-[0_0_18px_rgba(213,41,118,0.8)]"
+                >
+                  <InstagramIcon className="w-5 h-5 text-[#e1306c]" />
+                </a>
+
+                {/* LinkedIn */}
+                <a
+                  href={contact.social.find(s => s.label === 'LinkedIn')?.href || 'https://www.linkedin.com/company/connect2future/'}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="LinkedIn"
+                  className="w-10 h-10 rounded-full border border-[#0077b5] bg-transparent flex items-center justify-center transition-all hover:scale-110 shadow-[0_0_12px_rgba(0,119,181,0.5)] hover:shadow-[0_0_18px_rgba(0,119,181,0.8)]"
+                >
+                  <LinkedInIcon className="w-5 h-5 text-[#0077b5]" />
+                </a>
+
+                {/* WhatsApp */}
+                <a
+                  href={contact.whatsapp}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="WhatsApp"
+                  className="w-10 h-10 rounded-full border border-[#25d366] bg-transparent flex items-center justify-center transition-all hover:scale-110 shadow-[0_0_12px_rgba(37,211,102,0.5)] hover:shadow-[0_0_18px_rgba(37,211,102,0.8)]"
+                >
+                  <WhatsAppIcon className="w-5 h-5 text-[#25d366]" />
+                </a>
+
+                {/* Email */}
+                <a
+                  href={`mailto:${contact.email}`}
+                  aria-label="Email"
+                  className="w-10 h-10 rounded-full border border-[#ff2a5f] bg-transparent flex items-center justify-center transition-all hover:scale-110 shadow-[0_0_12px_rgba(255,42,95,0.5)] hover:shadow-[0_0_18px_rgba(255,42,95,0.8)]"
+                >
+                  <MailIcon className="w-5 h-5 text-[#ff2a5f]" />
+                </a>
               </div>
             </div>
 
-            <div className="relative min-h-64 overflow-hidden rounded-md border border-white/10 bg-[var(--color-void)]">
-              <iframe
-                title="Connect2Air location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3898.0893582701565!2d76.60613771107552!3d12.3097689878978!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8d5f4a2084adbec9%3A0xf4fcf3522495b959!2sconnect2future!5e0!3m2!1sen!2sin!4v1789022221822!5m2!1sen!2sin"
-                className="absolute inset-0 h-full w-full border-0"
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-              />
+            {/* 3. Our Location Card & Google Map */}
+            <div className="bg-[#0f040b]/90 border border-pink-500/25 rounded-2xl p-3.5 sm:p-4 shadow-md">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-pink-500 text-sm">📍</span>
+                  <div>
+                    <h4 className="text-xs font-bold text-white">Our Location</h4>
+                    <p className="text-[10px] text-white/60 leading-none mt-0.5">Vijayanagar, Mysuru, Karnataka, India</p>
+                  </div>
+                </div>
+
+                <a
+                  href="https://maps.google.com/?q=Vijayanagar,Mysuru,Karnataka,India"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-2.5 py-1 rounded-lg border border-pink-500/40 hover:border-pink-400 text-pink-300 hover:text-white text-[10px] font-bold uppercase transition-colors flex items-center gap-1 bg-pink-500/10"
+                >
+                  <span>Open in Maps</span>
+                  <span>↗</span>
+                </a>
+              </div>
+
+              {/* Embedded Map Frame */}
+              <div className="relative h-40 sm:h-44 rounded-xl overflow-hidden border border-white/10 shadow-inner">
+                <iframe
+                  title="Connect2Air Location Map"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3898.0893582701565!2d76.60613771107552!3d12.3097689878978!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8d5f4a2084adbec9%3A0xf4fcf3522495b959!2sconnect2future!5e0!3m2!1sen!2sin!4v1789022221822!5m2!1sen!2sin"
+                  className="absolute inset-0 h-full w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              </div>
             </div>
+
           </div>
+
         </div>
+
       </div>
     </section>
   );
