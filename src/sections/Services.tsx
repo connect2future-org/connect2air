@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from '@/lib/gsap';
+import StrokeText from '@/components/StrokeText';
+import ElectricBorder from '@/components/ElectricBorder';
 import {
   getCMSServices,
   getCMSPricing,
@@ -81,13 +83,13 @@ export default function Services() {
         const innerCard = panel.querySelector('.group');
         if (!innerCard) return;
         gsap.to(innerCard, {
-          scale: 0.94,
-          opacity: 0.35,
+          scale: 0.96,
+          opacity: 0.6,
           ease: 'none',
           scrollTrigger: {
             trigger: next,
-            start: 'top bottom',
-            end: 'top top',
+            start: 'top 80%',
+            end: 'top 120px',
             scrub: true,
           },
         });
@@ -108,7 +110,25 @@ export default function Services() {
             <h2 className="font-display text-4xl font-extrabold uppercase leading-[1.02] tracking-tight sm:text-6xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
               One sky.
               <br />
-              <span className="text-[var(--color-signal-2)] text-glow drop-shadow-[0_0_20px_rgba(255,77,109,0.7)]">Endless possibilities.</span>
+              <span className="text-[var(--color-signal-2)] text-glow drop-shadow-[0_0_20px_rgba(255,77,109,0.7)] inline-block">
+                <StrokeText
+                  text="ENDLESS POSSIBILITIES."
+                  accentText="ENDLESS POSSIBILITIES."
+                  strokeColor="#ff007f"
+                  fillColor="#ffffff"
+                  strokeWidth={2}
+                  drawDuration={1.8}
+                  fillDelay={0.3}
+                  repeatDelay={5}
+                  stagger={0.06}
+                  ease="power2.out"
+                  trigger="loop"
+                  fillMode="wipe"
+                  fontSize={56}
+                  fontWeight={900}
+                  letterSpacing={-2}
+                />
+              </span>
             </h2>
             <p className="mt-4 text-lg font-medium text-white/90 leading-relaxed">
               Aerial advertising engineered for moments people remember. Multi-flight display packages tailored to your event schedule.
@@ -123,46 +143,47 @@ export default function Services() {
           <div className="lg:col-span-7">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               {displayPricing.map((pkg, idx) => (
-                <div
-                  key={pkg.id || pkg.step}
-                  onClick={() => setSelectedPricing(pkg)}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-xl transition-all duration-500 hover:border-pink-400 hover:bg-white/[0.1] hover:shadow-[0_0_30px_rgba(255,77,109,0.3)] hover:-translate-y-1 cursor-pointer"
-                >
-                  <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-rose-500 opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-40" />
-                  
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-pink-300 bg-pink-500/20 border border-pink-400/30 px-2 py-0.5 rounded-full shadow-[0_0_8px_rgba(255,42,85,0.2)]">
-                        {pkg.badge || 'Flight Package'}
+                <ElectricBorder key={pkg.id || pkg.step} color="#ffffff" speed={1} chaos={0.07} borderRadius={16}>
+                  <div
+                    onClick={() => setSelectedPricing(pkg)}
+                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-xl transition-all duration-500 hover:bg-white/[0.1] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:-translate-y-1 cursor-pointer h-full"
+                  >
+                    <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-white opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-30" />
+                    
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-pink-300 bg-pink-500/20 px-2.5 py-0.5 rounded-full shadow-[0_0_8px_rgba(255,42,85,0.2)]">
+                          {pkg.badge || 'Flight Package'}
+                        </span>
+                        <span className="font-mono text-xs font-bold text-white/50">0{idx + 1}</span>
+                      </div>
+
+                      <div className="font-display text-xl font-black uppercase text-white group-hover:text-pink-300 transition-colors">
+                        {pkg.step}
+                      </div>
+
+                      <div className="mt-1 font-display text-3xl font-black text-pink-300 text-glow drop-shadow-[0_0_12px_rgba(255,77,109,0.6)]">
+                        {pkg.price}
+                      </div>
+
+                      <div className="mt-2 flex items-center gap-2 text-white">
+                        <ClockIcon className="h-4 w-4 text-rose-400 shrink-0" />
+                        <span className="font-mono text-xs font-extrabold tracking-wider">{pkg.duration}</span>
+                      </div>
+
+                      <p className="mt-3 text-xs font-medium text-white/80 leading-relaxed line-clamp-3">
+                        {pkg.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-5 pt-3 flex items-center justify-between">
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-white/70">{pkg.timeline}</span>
+                      <span className="font-mono text-[10px] font-bold text-pink-300 flex items-center gap-1 group-hover:text-white transition-colors">
+                        Details <span className="text-xs transition-transform duration-300 group-hover:translate-x-1">→</span>
                       </span>
-                      <span className="font-mono text-xs font-bold text-white/50">0{idx + 1}</span>
                     </div>
-
-                    <div className="font-display text-xl font-black uppercase text-white group-hover:text-pink-300 transition-colors">
-                      {pkg.step}
-                    </div>
-
-                    <div className="mt-1 font-display text-3xl font-black text-pink-300 text-glow drop-shadow-[0_0_12px_rgba(255,77,109,0.6)]">
-                      {pkg.price}
-                    </div>
-
-                    <div className="mt-2 flex items-center gap-2 text-white">
-                      <ClockIcon className="h-4 w-4 text-rose-400 shrink-0" />
-                      <span className="font-mono text-xs font-extrabold tracking-wider">{pkg.duration}</span>
-                    </div>
-
-                    <p className="mt-3 text-xs font-medium text-white/80 leading-relaxed line-clamp-3">
-                      {pkg.description}
-                    </p>
                   </div>
-
-                  <div className="mt-5 border-t border-white/15 pt-3 flex items-center justify-between">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-white/70">{pkg.timeline}</span>
-                    <span className="font-mono text-[10px] font-bold text-pink-300 flex items-center gap-1 group-hover:text-white transition-colors">
-                      Details <span className="text-xs transition-transform duration-300 group-hover:translate-x-1">→</span>
-                    </span>
-                  </div>
-                </div>
+                </ElectricBorder>
               ))}
             </div>
           </div>
@@ -170,7 +191,7 @@ export default function Services() {
       </div>
 
       {/* Dynamic Overlapping Sticky Cards with 3D & Color Effects */}
-      <div className="relative mt-8">
+      <div className="relative mt-8 pb-12">
         {servicesList.map((service, i) => (
           <div
             key={service.id || service.number}
@@ -178,42 +199,44 @@ export default function Services() {
               panelRefs.current[i] = el;
             }}
             className="sticky origin-top py-4"
-            style={{ top: `${80 + i * 16}px` }}
+            style={{ top: `${90 + i * 16}px`, zIndex: i + 10 }}
           >
             <div className="container-page">
-              <div className="group relative overflow-hidden rounded-3xl border border-rose-500/30 bg-gradient-to-r from-[#240913]/95 via-[#1a060e]/95 to-[#100308]/95 p-8 sm:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.8)] backdrop-blur-2xl transition-all duration-500 hover:border-pink-400 hover:shadow-[0_0_50px_rgba(255,77,109,0.3)] hover:-translate-y-1">
-                
-                {/* Vibrant ambient background glow effect */}
-                <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-rose-500/15 blur-3xl transition-all duration-700 group-hover:bg-pink-500/30 group-hover:scale-125" />
-                <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-red-600/15 blur-3xl transition-all duration-700 group-hover:bg-red-500/30" />
+              <ElectricBorder color="#ff007f" speed={1} chaos={0.07} borderRadius={24}>
+                <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#240913]/95 via-[#1a060e]/95 to-[#100308]/95 p-8 sm:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.8)] backdrop-blur-2xl transition-all duration-500 hover:shadow-[0_0_50px_rgba(255,77,109,0.3)] hover:-translate-y-1">
+                  
+                  {/* Vibrant ambient background glow effect */}
+                  <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-rose-500/15 blur-3xl transition-all duration-700 group-hover:bg-pink-500/30 group-hover:scale-125" />
+                  <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-red-600/15 blur-3xl transition-all duration-700 group-hover:bg-red-500/30" />
 
-                <div className="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-center sm:gap-12">
-                  {/* Service Number & Category */}
-                  <div className="flex items-center gap-4 sm:w-1/3">
-                    <span className="font-mono text-3xl font-black text-pink-400 text-glow drop-shadow-[0_0_15px_rgba(255,77,109,0.6)]">
-                      {service.number}
-                    </span>
-                    <div className="h-8 w-px bg-pink-500/30" />
-                    <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-pink-300 bg-pink-500/15 border border-pink-400/30 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(255,42,85,0.2)]">
-                      {service.category}
-                    </span>
-                  </div>
+                  <div className="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-center sm:gap-12">
+                    {/* Service Number & Category */}
+                    <div className="flex items-center gap-4 sm:w-1/3">
+                      <span className="font-mono text-3xl font-black text-pink-400 text-glow drop-shadow-[0_0_15px_rgba(255,77,109,0.6)]">
+                        {service.number}
+                      </span>
+                      <div className="h-8 w-px bg-pink-500/30" />
+                      <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-pink-300 bg-pink-500/15 border border-pink-400/30 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(255,42,85,0.2)]">
+                        {service.category}
+                      </span>
+                    </div>
 
-                  {/* Title & Description */}
-                  <div className="sm:w-2/3">
-                    <h3 className="font-display text-2xl font-extrabold uppercase leading-[1.08] tracking-tight sm:text-4xl text-white group-hover:text-pink-200 transition-colors drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
-                      {service.title}
-                    </h3>
-                    <p className="mt-4 text-base font-medium text-white/90 leading-relaxed max-w-xl">
-                      {service.description}
-                    </p>
-                    <div className="mt-6 h-0.5 w-full max-w-lg bg-white/10 rounded-full overflow-hidden">
-                      <div className="h-full w-0 bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 transition-all duration-700 group-hover:w-full" />
+                    {/* Title & Description */}
+                    <div className="sm:w-2/3">
+                      <h3 className="font-display text-2xl font-extrabold uppercase leading-[1.08] tracking-tight sm:text-4xl text-white group-hover:text-pink-200 transition-colors drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+                        {service.title}
+                      </h3>
+                      <p className="mt-4 text-base font-medium text-white/90 leading-relaxed max-w-xl">
+                        {service.description}
+                      </p>
+                      <div className="mt-6 h-0.5 w-full max-w-lg bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full w-0 bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 transition-all duration-700 group-hover:w-full" />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-              </div>
+                </div>
+              </ElectricBorder>
             </div>
           </div>
         ))}

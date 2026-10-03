@@ -237,6 +237,9 @@ export async function uploadCMSMedia(formData: FormData): Promise<MediaItem | nu
             const { signature, timestamp, cloudName, apiKey, folder } = sigJson.data;
 
             // 2. Upload file directly from browser to Cloudinary
+            const isVideo = file.type.startsWith('video/');
+            const resourceType = isVideo ? 'video' : 'image';
+
             const cloudData = new FormData();
             cloudData.append('file', file);
             cloudData.append('api_key', apiKey);
@@ -244,7 +247,7 @@ export async function uploadCMSMedia(formData: FormData): Promise<MediaItem | nu
             cloudData.append('signature', signature);
             cloudData.append('folder', folder);
 
-            const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+            const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
               method: 'POST',
               body: cloudData,
             });

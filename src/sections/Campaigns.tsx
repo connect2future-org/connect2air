@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { campaigns } from '@/data/siteData';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import StrokeText from '@/components/StrokeText';
 import concertImg from '@/images/CONECRT.png';
 import sportsImg from '@/images/SPORTS.png';
 import festivalImg from '@/images/FESTIVALS.png';
@@ -37,7 +38,25 @@ export default function Campaigns() {
           <h2 className="font-display max-w-xl text-4xl font-black uppercase leading-[1.02] tracking-tight sm:text-6xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
             Where your
             <br />
-            <span className="text-[var(--color-signal-2)] text-glow">brand takes off.</span>
+            <span className="text-[var(--color-signal-2)] text-glow inline-block">
+              <StrokeText
+                text="BRAND TAKES OFF."
+                accentText="BRAND TAKES OFF."
+                strokeColor="#ff007f"
+                fillColor="#ffffff"
+                strokeWidth={2}
+                drawDuration={1.8}
+                fillDelay={0.3}
+                repeatDelay={5}
+                stagger={0.06}
+                ease="power2.out"
+                trigger="loop"
+                fillMode="wipe"
+                fontSize={56}
+                fontWeight={900}
+                letterSpacing={-2}
+              />
+            </span>
           </h2>
         </div>
 

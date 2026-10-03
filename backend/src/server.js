@@ -14,7 +14,8 @@ const port = Number(process.env.PORT) || 5001;
 const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173').split(',').map((origin) => origin.trim());
 
 app.use(cors({ origin: allowedOrigins }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '200mb' }));
+app.use(express.urlencoded({ limit: '200mb', extended: true }));
 
 app.get('/', (_req, res) => {
   res.status(200).json({

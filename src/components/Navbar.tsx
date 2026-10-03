@@ -84,10 +84,15 @@ export default function Navbar() {
                 onClick={(e) => {
                   if (link.href.startsWith('#')) {
                     e.preventDefault();
-                    const target = document.querySelector(link.href);
+                    const target = document.querySelector(link.href) as HTMLElement | null;
                     if (target) {
-                      const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 84;
-                      window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                      const lenis = (window as unknown as { lenis?: { scrollTo: (el: HTMLElement | string, opts?: { offset?: number }) => void } }).lenis;
+                      if (lenis) {
+                        lenis.scrollTo(target, { offset: -84 });
+                      } else {
+                        const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 84;
+                        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                      }
                       window.history.pushState(null, '', link.href);
                     }
                   }
@@ -136,10 +141,15 @@ export default function Navbar() {
               setOpen(false);
               if (link.href.startsWith('#')) {
                 e.preventDefault();
-                const target = document.querySelector(link.href);
+                const target = document.querySelector(link.href) as HTMLElement | null;
                 if (target) {
-                  const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 84;
-                  window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                  const lenis = (window as unknown as { lenis?: { scrollTo: (el: HTMLElement | string, opts?: { offset?: number }) => void } }).lenis;
+                  if (lenis) {
+                    lenis.scrollTo(target, { offset: -84 });
+                  } else {
+                    const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 84;
+                    window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                  }
                   window.history.pushState(null, '', link.href);
                 }
               }

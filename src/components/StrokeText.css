@@ -1,0 +1,38 @@
+.stroke-text {
+  display: inline-block;
+  vertical-align: baseline;
+  line-height: 1;
+  position: relative;
+  max-width: 100%;
+}
+
+.stroke-text--hover {
+  cursor: pointer;
+}
+
+.stroke-text__svg {
+  display: inline-block;
+  vertical-align: baseline;
+  width: auto;
+  max-width: 100%;
+  height: var(--stroke-text-height, 1.15em);
+  max-height: 100%;
+  overflow: visible;
+}
+
+.stroke-text__fill-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  will-change: clip-path, -webkit-clip-path;
+  clip-path: inset(0% 100% 0% 0%);
+  -webkit-clip-path: inset(0% 100% 0% 0%);
+}
+
+.stroke-text__stroke,
+.stroke-text__fill {
+  user-select: none;
+}

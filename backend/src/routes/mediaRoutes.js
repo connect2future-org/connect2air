@@ -33,10 +33,20 @@ const upload = multer({
 // Helper: Upload buffer to Cloudinary via stream
 function uploadToCloudinary(buffer, options) {
   return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(options, (error, result) => {
-      if (error) return reject(error);
+    const isVideo = options.resource_type === 'video';
+    const streamOptions = {
+      ...options,
+      chunk_size: isVideo ? 6000000 : undefined,
+    };
+
+    const uploadStream = cloudinary.uploader.upload_stream(streamOptions, (error, result) => {
+      if (error) {
+        console.error('Cloudinary stream upload error:', error);
+        return reject(error);
+      }
       resolve(result);
     });
+
     streamifier.createReadStream(buffer).pipe(uploadStream);
   });
 }

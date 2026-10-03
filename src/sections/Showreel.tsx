@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { getCMSMediaAsync, type MediaItem } from '@/utils/cmsStorage';
+import StrokeText from '@/components/StrokeText';
 
 // Map size field → Tailwind aspect-ratio class and label
 const SIZE_CONFIG: Record<string, { aspect: string; label: string }> = {
@@ -153,8 +154,25 @@ export default function Showreel() {
               Featured Reel &amp; Media
             </span>
             <h2 className="font-display text-3xl font-black uppercase leading-tight tracking-tight sm:text-5xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
-              Watch{' '}
-              <span className="text-[var(--color-signal-2)] text-glow">the sky move.</span>
+              <StrokeText
+                text="WATCH THE SKY MOVE."
+                accentText="THE SKY MOVE."
+                strokeColor="#ffffff"
+                fillColor="#ffffff"
+                accentStrokeColor="#ff007f"
+                accentFillColor="#ff007f"
+                strokeWidth={2}
+                drawDuration={1.5}
+                fillDelay={0.05}
+                repeatDelay={5}
+                stagger={0.04}
+                ease="power2.out"
+                trigger="loop"
+                fillMode="wipe"
+                fontSize={64}
+                fontWeight={900}
+                letterSpacing={-2}
+              />
             </h2>
           </div>
 

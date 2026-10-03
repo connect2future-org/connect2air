@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { hero } from '@/data/siteData';
 import MagneticButton from '@/components/MagneticButton';
+import StrokeText from '@/components/StrokeText';
 
 const Scene = lazy(() =>
   import('@/components/three/Scene').then((m) => ({ default: m.Scene })),
@@ -153,7 +154,23 @@ export default function Hero({ ready }: { ready: boolean }) {
             </span>
             <span className="block overflow-hidden">
               <span className="line block text-[var(--color-signal-2)] text-glow drop-shadow-[0_0_25px_rgba(255,77,109,0.8)]">
-                {hero.headlineAccent}.
+                <StrokeText
+                  text="INTO SKIES."
+                  accentText="INTO SKIES."
+                  strokeColor="#ff007f"
+                  fillColor="#ffffff"
+                  strokeWidth={2}
+                  drawDuration={1.8}
+                  fillDelay={0.3}
+                  repeatDelay={5}
+                  stagger={0.06}
+                  ease="power2.out"
+                  trigger="loop"
+                  fillMode="wipe"
+                  fontSize={64}
+                  fontWeight={900}
+                  letterSpacing={-2}
+                />
               </span>
             </span>
           </h1>
@@ -224,12 +241,25 @@ export default function Hero({ ready }: { ready: boolean }) {
           {/* Bottom connector line */}
           <span className="c2a-bridge__line hidden lg:block" />
 
-          {/* Tagline */}
-          <p className="c2a-bridge__tagline">
-            BUILT FOR
-            <br />
-            THE SKY
-          </p>
+          {/* Tagline next to drone using StrokeText */}
+          <div className="c2a-bridge__tagline pt-2 w-32 sm:w-44 mx-auto">
+            <StrokeText
+              text="BUILT FOR THE SKY"
+              strokeColor="#ff007f"
+              fillColor="#ffffff"
+              strokeWidth={1.5}
+              drawDuration={1.8}
+              fillDelay={0.3}
+              repeatDelay={5}
+              stagger={0.05}
+              ease="power2.out"
+              trigger="loop"
+              fillMode="wipe"
+              fontSize={44}
+              fontWeight={900}
+              letterSpacing={-1}
+            />
+          </div>
         </div>
 
         {/* ============================================================ */}

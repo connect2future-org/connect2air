@@ -22,6 +22,8 @@ export function useSmoothScroll() {
       touchMultiplier: 1.2,
     });
 
+    (window as unknown as { lenis?: Lenis }).lenis = lenis;
+
     lenis.on('scroll', ScrollTrigger.update);
 
     const tick = (time: number) => {
@@ -30,7 +32,18 @@ export function useSmoothScroll() {
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
 
+    // Refresh ScrollTrigger cached pin positions after DOM layout & images settle
+    const t1 = setTimeout(() => ScrollTrigger.refresh(), 300);
+    const t2 = setTimeout(() => ScrollTrigger.refresh(), 1000);
+
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      document.fonts.ready.then(() => ScrollTrigger.refresh()).catch(() => {});
+    }
+
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      delete (window as unknown as { lenis?: Lenis }).lenis;
       gsap.ticker.remove(tick);
       lenis.destroy();
     };

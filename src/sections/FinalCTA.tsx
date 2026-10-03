@@ -3,6 +3,7 @@ import { gsap } from '@/lib/gsap';
 import MagneticButton from '@/components/MagneticButton';
 import { contact } from '@/data/siteData';
 import { WhatsAppIcon } from '@/components/Icons';
+import StrokeText from '@/components/StrokeText';
 
 export default function FinalCTA() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -49,10 +50,49 @@ export default function FinalCTA() {
       <div className="pulse-dot pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-400" />
 
       <div ref={headingRef} className="container-page relative text-center">
-        <div data-reveal className="eyebrow mb-6 text-pink-300 font-bold uppercase tracking-widest">Ready when you are</div>
-        <h2 className="font-display mx-auto max-w-4xl text-[11vw] font-black uppercase leading-[0.95] tracking-tight sm:text-7xl text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
-          <span data-reveal className="block">Ready to take</span>
-          <span data-reveal className="block">your brand <span className="text-[var(--color-signal-2)] text-glow">higher?</span></span>
+        <div data-reveal className="eyebrow mb-6 text-pink-300 font-bold uppercase tracking-[0.2em] text-xs sm:text-sm">
+          READY WHEN YOU ARE
+        </div>
+        <h2 className="font-display mx-auto max-w-5xl text-[10vw] font-black uppercase leading-[0.95] tracking-tight sm:text-7xl lg:text-8xl text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+          <span data-reveal className="block">
+            <StrokeText
+              text="READY TO TAKE"
+              strokeColor="#ffffff"
+              fillColor="#ffffff"
+              strokeWidth={2}
+              drawDuration={1.8}
+              fillDelay={0.3}
+              repeatDelay={5}
+              stagger={0.06}
+              ease="power2.out"
+              trigger="loop"
+              fillMode="wipe"
+              fontSize={64}
+              fontWeight={900}
+              letterSpacing={-2}
+            />
+          </span>
+          <span data-reveal className="block mt-1 sm:mt-2">
+            <StrokeText
+              text="YOUR BRAND HIGHER?"
+              accentText="HIGHER?"
+              strokeColor="#ffffff"
+              fillColor="#ffffff"
+              accentStrokeColor="#ff007f"
+              accentFillColor="#ff007f"
+              strokeWidth={2}
+              drawDuration={1.8}
+              fillDelay={0.05}
+              repeatDelay={5}
+              stagger={0.04}
+              ease="power2.out"
+              trigger="loop"
+              fillMode="wipe"
+              fontSize={64}
+              fontWeight={900}
+              letterSpacing={-2}
+            />
+          </span>
         </h2>
         <p data-reveal className="mx-auto mt-6 max-w-md text-lg font-medium text-white/90 leading-relaxed">
           Let's create something people can't help but look up for.
