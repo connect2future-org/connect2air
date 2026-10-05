@@ -18,8 +18,8 @@ export default function About() {
           {/* ── LEFT COLUMN ── */}
           <div className="lg:col-span-6 space-y-6">
             
-            {/* Main Headline & Circle Dot Indicator */}
-            <div data-reveal className="flex items-center justify-between gap-4">
+            {/* Main Headline */}
+            <div data-reveal>
               <h2 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-white uppercase tracking-tight leading-[0.95] drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]">
                 PIONEERING<br />
                 <span className="text-[#ff007f] drop-shadow-[0_0_30px_rgba(255,0,127,0.7)] inline-block">
@@ -42,11 +42,6 @@ export default function About() {
                 </span><br />
                 TECHNOLOGY<span className="text-[#ff007f]">.</span>
               </h2>
-
-              {/* Circle dot indicator next to headline */}
-              <div className="w-10 h-10 rounded-full border border-white/20 bg-black/40 flex items-center justify-center shrink-0 self-center shadow-inner">
-                <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-              </div>
             </div>
 
             {/* Sub-description Paragraph */}

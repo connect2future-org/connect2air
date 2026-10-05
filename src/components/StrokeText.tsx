@@ -56,7 +56,7 @@ export default function StrokeText({
 }: StrokeTextProps) {
   const rootRef = useRef<HTMLSpanElement>(null);
   const strokeTextRef = useRef<SVGTextElement>(null);
-  const fillWrapRef = useRef<HTMLSpanElement>(null);
+  const fillWrapRef = useRef<SVGGElement | null>(null);
 
   const [box, setBox] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 

@@ -17,8 +17,8 @@ const DEFAULT_PRICING_ITEMS: PricingItem[] = [
     step: 'ONE FLY',
     price: '₹15,000',
     duration: '10 MINS',
-    badge: '1 Flight',
-    timeline: 'Single Display',
+    badge: '1 FLIGHT',
+    timeline: 'SINGLE DISPLAY',
     description: '1 Flight duration of 10 minutes over the venue crowd.',
   },
   {
@@ -26,8 +26,8 @@ const DEFAULT_PRICING_ITEMS: PricingItem[] = [
     step: 'TWO FLIES',
     price: '₹30,000',
     duration: '20 MINS',
-    badge: '2 Flights',
-    timeline: '2 Sessions',
+    badge: '2 FLIGHTS',
+    timeline: '2 SESSIONS',
     description: '2 Flights totaling 20 minutes with 1 hour interval.',
   },
   {
@@ -35,9 +35,18 @@ const DEFAULT_PRICING_ITEMS: PricingItem[] = [
     step: 'THREE FLIES',
     price: '₹45,000',
     duration: '30 MINS',
-    badge: '3 Flights',
-    timeline: '3 Sessions',
+    badge: '3 FLIGHTS',
+    timeline: '3 SESSIONS',
     description: '3 Flights totaling 30 minutes with 1 hour intervals.',
+  },
+  {
+    id: 'p4',
+    step: 'CUSTOM DISPLAY',
+    price: 'Variable Price',
+    duration: 'Custom Duration',
+    badge: 'BASED ON DURATION',
+    timeline: 'AS PER REQUIREMENT',
+    description: 'A Custom type Drone LED Display can be made as per the Client requirements.',
   },
 ];
 
@@ -105,9 +114,9 @@ export default function Services() {
       <div id="pricing" ref={headingRef} className="container-page mb-8 sm:mb-12 scroll-mt-24">
         <div className="grid gap-8 lg:grid-cols-12 lg:items-center lg:gap-12">
           {/* Left Column: Heading & Tagline (Always 100% visible) */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-4">
             <div className="eyebrow mb-4 text-pink-300 font-bold uppercase tracking-widest">Services & Packages</div>
-            <h2 className="font-display text-4xl font-extrabold uppercase leading-[1.02] tracking-tight sm:text-6xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
+            <h2 className="font-display text-4xl font-extrabold uppercase leading-[1.02] tracking-tight sm:text-5xl lg:text-6xl text-white drop-shadow-[0_2px_12px_rgba(255,42,85,0.3)]">
               One sky.
               <br />
               <span className="text-[var(--color-signal-2)] text-glow drop-shadow-[0_0_20px_rgba(255,77,109,0.7)] inline-block">
@@ -124,13 +133,13 @@ export default function Services() {
                   ease="power2.out"
                   trigger="loop"
                   fillMode="wipe"
-                  fontSize={56}
+                  fontSize={52}
                   fontWeight={900}
                   letterSpacing={-2}
                 />
               </span>
             </h2>
-            <p className="mt-4 text-lg font-medium text-white/90 leading-relaxed">
+            <p className="mt-4 text-base sm:text-lg font-medium text-white/90 leading-relaxed">
               Aerial advertising engineered for moments people remember. Multi-flight display packages tailored to your event schedule.
             </p>
             <div className="mt-5 inline-flex items-center gap-2.5 rounded-full border border-pink-500/40 bg-pink-500/10 px-4 py-2 font-mono text-xs font-bold text-pink-300 shadow-[0_0_15px_rgba(255,42,85,0.2)]">
@@ -139,47 +148,71 @@ export default function Services() {
             </div>
           </div>
 
-          {/* Right Column: Pricing Flight Cards (Always visible) */}
-          <div className="lg:col-span-7">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {/* Right Column: Pricing Flight Cards (3 Columns in Row 1, 1 Column in Row 2) */}
+          <div className="lg:col-span-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 lg:gap-4">
               {displayPricing.map((pkg, idx) => (
                 <ElectricBorder key={pkg.id || pkg.step} color="#ffffff" speed={1} chaos={0.07} borderRadius={16}>
                   <div
                     onClick={() => setSelectedPricing(pkg)}
-                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-5 backdrop-blur-xl transition-all duration-500 hover:bg-white/[0.1] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:-translate-y-1 cursor-pointer h-full"
+                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-b from-[#14050e]/95 via-[#0d0309]/95 to-[#070104]/95 p-3.5 sm:p-4 backdrop-blur-xl transition-all duration-500 hover:bg-white/[0.08] hover:shadow-[0_0_30px_rgba(255,0,127,0.3)] hover:-translate-y-1 cursor-pointer h-full border border-pink-500/20"
                   >
-                    <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-white opacity-10 blur-2xl transition-opacity duration-500 group-hover:opacity-30" />
+                    <div className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-pink-500 opacity-10 blur-xl transition-opacity duration-500 group-hover:opacity-25" />
                     
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-pink-300 bg-pink-500/20 px-2.5 py-0.5 rounded-full shadow-[0_0_8px_rgba(255,42,85,0.2)]">
+                    <div className="space-y-1.5">
+                      {/* Top Header Badge & Index */}
+                      <div className="flex items-center justify-between gap-1 mb-1">
+                        <span className="font-mono text-[8.5px] sm:text-[9px] font-bold uppercase tracking-widest text-pink-300 bg-pink-500/20 border border-pink-400/40 px-2.5 py-0.5 rounded-full shadow-[0_0_6px_rgba(255,20,147,0.25)]">
                           {pkg.badge || 'Flight Package'}
                         </span>
-                        <span className="font-mono text-xs font-bold text-white/50">0{idx + 1}</span>
+                        <span className="font-mono text-[10px] font-bold text-white/40">0{idx + 1}</span>
                       </div>
 
-                      <div className="font-display text-xl font-black uppercase text-white group-hover:text-pink-300 transition-colors">
+                      {/* Package Title */}
+                      <div className="font-display text-xs sm:text-sm font-black uppercase text-white tracking-wide group-hover:text-pink-300 transition-colors leading-tight">
                         {pkg.step}
                       </div>
 
-                      <div className="mt-1 font-display text-3xl font-black text-pink-300 text-glow drop-shadow-[0_0_12px_rgba(255,77,109,0.6)]">
+                      {/* Package Price */}
+                      <div className="font-display text-xl sm:text-2xl font-black text-pink-300 text-glow drop-shadow-[0_0_12px_rgba(255,20,147,0.7)] leading-none pt-0.5">
                         {pkg.price}
                       </div>
 
-                      <div className="mt-2 flex items-center gap-2 text-white">
-                        <ClockIcon className="h-4 w-4 text-rose-400 shrink-0" />
-                        <span className="font-mono text-xs font-extrabold tracking-wider">{pkg.duration}</span>
+                      {/* Duration */}
+                      <div className="flex items-center gap-1.5 text-white pt-0.5">
+                        <ClockIcon className="h-3.5 w-3.5 text-rose-400 shrink-0" />
+                        <span className="font-mono text-[10.5px] sm:text-xs font-extrabold tracking-wider">{pkg.duration}</span>
                       </div>
 
-                      <p className="mt-3 text-xs font-medium text-white/80 leading-relaxed line-clamp-3">
+                      {/* Description */}
+                      <p className="text-[10px] sm:text-[11px] font-medium text-white/80 leading-snug pt-0.5">
                         {pkg.description}
                       </p>
                     </div>
 
-                    <div className="mt-5 pt-3 flex items-center justify-between">
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-white/70">{pkg.timeline}</span>
-                      <span className="font-mono text-[10px] font-bold text-pink-300 flex items-center gap-1 group-hover:text-white transition-colors">
-                        Details <span className="text-xs transition-transform duration-300 group-hover:translate-x-1">→</span>
+                    {/* Video Camera Add-On Banner Box (Exact match to reference image) */}
+                    <div className="my-2.5 bg-[#1c0514]/95 border border-pink-500/50 rounded-2xl p-2.5 sm:p-3 flex items-center gap-2.5 sm:gap-3 shadow-[0_0_15px_rgba(255,0,127,0.15)]">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#ff007f] text-white flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(255,0,127,0.5)]">
+                        <VideoCameraIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-mono text-xs sm:text-sm font-black text-[#ff4d8d] leading-none tracking-wide">
+                          + ₹3,000
+                        </div>
+                        <div className="text-[10px] sm:text-[10.5px] font-bold text-white leading-tight mt-1">
+                          for drone shots &amp; video shoot
+                        </div>
+                        <div className="text-[9.5px] sm:text-[10px] font-medium text-white/75 leading-tight">
+                          (if required).
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer Row */}
+                    <div className="pt-2.5 border-t border-white/15 flex items-center justify-between mt-auto">
+                      <span className="font-mono text-[9px] sm:text-[9.5px] font-extrabold uppercase tracking-wider text-white truncate">{pkg.timeline}</span>
+                      <span className="font-mono text-[9px] sm:text-[9.5px] font-bold text-pink-400 flex items-center gap-0.5 group-hover:text-pink-300 transition-colors shrink-0">
+                        Details <span className="text-[10px] transition-transform duration-300 group-hover:translate-x-0.5">→</span>
                       </span>
                     </div>
                   </div>
@@ -358,6 +391,15 @@ function ClockIcon({ className = 'h-4 w-4' }: { className?: string }) {
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
+function VideoCameraIcon({ className = 'h-5 w-5' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11" />
+      <rect width="14" height="12" x="2" y="6" rx="2" />
     </svg>
   );
 }

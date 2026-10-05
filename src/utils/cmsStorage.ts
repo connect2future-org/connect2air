@@ -149,8 +149,8 @@ const DEFAULT_PRICING: PricingItem[] = [
     step: 'ONE FLY',
     price: '₹15,000',
     duration: '10 MINS',
-    badge: '1 Flight',
-    timeline: 'Single Display',
+    badge: '1 FLIGHT',
+    timeline: 'SINGLE DISPLAY',
     description: '1 Flight duration of 10 minutes over the venue crowd.',
   },
   {
@@ -158,8 +158,8 @@ const DEFAULT_PRICING: PricingItem[] = [
     step: 'TWO FLIES',
     price: '₹30,000',
     duration: '20 MINS',
-    badge: '2 Flights',
-    timeline: '2 Sessions',
+    badge: '2 FLIGHTS',
+    timeline: '2 SESSIONS',
     description: '2 Flights totaling 20 minutes with 1 hour interval.',
   },
   {
@@ -167,9 +167,18 @@ const DEFAULT_PRICING: PricingItem[] = [
     step: 'THREE FLIES',
     price: '₹45,000',
     duration: '30 MINS',
-    badge: '3 Flights',
-    timeline: '3 Sessions',
+    badge: '3 FLIGHTS',
+    timeline: '3 SESSIONS',
     description: '3 Flights totaling 30 minutes with 1 hour intervals.',
+  },
+  {
+    id: 'p4',
+    step: 'CUSTOM DISPLAY',
+    price: 'Variable Price',
+    duration: 'Custom Duration',
+    badge: 'BASED ON DURATION',
+    timeline: 'AS PER REQUIREMENT',
+    description: 'A Custom type Drone LED Display can be made as per the Client requirements.',
   },
 ];
 
