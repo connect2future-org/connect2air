@@ -9,8 +9,8 @@ export default function About() {
   return (
     <section id="about" className="relative bg-[#060105] py-12 sm:py-16 border-t border-pink-500/20 scroll-mt-20 overflow-hidden">
       {/* Background Neon Spotlights */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-pink-500/10 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-rose-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 right-10 w-[350px] h-[350px] bg-rose-600/10 rounded-full blur-2xl pointer-events-none" />
 
       <div className="container-page relative z-10">
         <div ref={ref} className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">

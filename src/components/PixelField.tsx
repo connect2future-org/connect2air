@@ -81,7 +81,7 @@ export default function PixelField({ progressRef, label = 'CONNECT2AIR', classNa
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isSmall = window.innerWidth < 768;
-    const COUNT = reduced ? 0 : isSmall ? 600 : 1300;
+    const COUNT = reduced ? 0 : isSmall ? 300 : 650;
 
     function build() {
       const w = window.innerWidth;

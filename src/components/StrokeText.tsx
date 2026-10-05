@@ -194,6 +194,7 @@ export default function StrokeText({
     if (typeof window === 'undefined' || !root) return undefined;
 
     const strokes = gsap.utils.toArray(root.querySelectorAll('[data-stroke-char]'));
+    const fillChars = gsap.utils.toArray(root.querySelectorAll('[data-fill-char]'));
     const fillWrap = fillWrapRef.current;
     if (!strokes.length) return undefined;
 
@@ -202,7 +203,7 @@ export default function StrokeText({
     const staggerConfig: gsap.StaggerVars | number = reverse ? { each: stagger, from: 'end' } : stagger;
 
     const setStart = () => {
-      gsap.killTweensOf([strokes, fillWrap].filter(Boolean));
+      gsap.killTweensOf([strokes, fillWrap, ...fillChars].filter(Boolean));
       gsap.set(strokes, { strokeDasharray: dash, strokeDashoffset: dash });
       if (fillWrap) {
         gsap.set(fillWrap, {
@@ -211,10 +212,13 @@ export default function StrokeText({
           opacity: 1
         });
       }
+      if (fillChars.length) {
+        gsap.set(fillChars, { fillOpacity: 0 });
+      }
     };
 
     const setEnd = () => {
-      gsap.killTweensOf([strokes, fillWrap].filter(Boolean));
+      gsap.killTweensOf([strokes, fillWrap, ...fillChars].filter(Boolean));
       gsap.set(strokes, { strokeDasharray: dash, strokeDashoffset: 0 });
       if (fillWrap) {
         gsap.set(fillWrap, {
@@ -223,12 +227,15 @@ export default function StrokeText({
           opacity: 1
         });
       }
+      if (fillChars.length) {
+        gsap.set(fillChars, { fillOpacity: fillEnabled ? 1 : 0 });
+      }
     };
 
     const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
       setEnd();
-      return () => { gsap.killTweensOf([strokes, fillWrap].filter(Boolean)); };
+      return () => { gsap.killTweensOf([strokes, fillWrap, ...fillChars].filter(Boolean)); };
     }
 
     const build = () => {
@@ -252,22 +259,34 @@ export default function StrokeText({
       );
 
       // Stage 2: ONCE skeleton structure is drawn, flood solid color fill from left to right across entire text
-      if (fillEnabled && fillWrap) {
-        const fillStartTime = Math.max(0.2, (drawDuration + (strokes.length * (typeof stagger === 'number' ? stagger : 0.04))) * 0.75) + fillDelay;
-        tl.fromTo(
-          fillWrap,
-          {
-            clipPath: 'inset(0% 100% 0% 0%)',
-            webkitClipPath: 'inset(0% 100% 0% 0%)'
-          },
-          {
-            clipPath: 'inset(0% 0% 0% 0%)',
-            webkitClipPath: 'inset(0% 0% 0% 0%)',
-            duration: fillDuration,
-            ease: 'power2.inOut'
-          },
-          fillStartTime
-        );
+      if (fillEnabled) {
+        const fillStartTime = Math.max(0.2, (drawDuration + (strokes.length * (typeof stagger === 'number' ? stagger : 0.04))) * 0.6) + fillDelay;
+
+        if (fillWrap) {
+          tl.fromTo(
+            fillWrap,
+            {
+              clipPath: 'inset(0% 100% 0% 0%)',
+              webkitClipPath: 'inset(0% 100% 0% 0%)'
+            },
+            {
+              clipPath: 'inset(0% 0% 0% 0%)',
+              webkitClipPath: 'inset(0% 0% 0% 0%)',
+              duration: fillDuration,
+              ease: 'power2.inOut'
+            },
+            fillStartTime
+          );
+        }
+
+        if (fillChars.length) {
+          tl.fromTo(
+            fillChars,
+            { fillOpacity: 0 },
+            { fillOpacity: 1, duration: fillDuration * 0.8, ease: 'power2.out', stagger: staggerConfig },
+            fillStartTime
+          );
+        }
       }
 
       return tl;
@@ -310,7 +329,7 @@ export default function StrokeText({
       removeHover?.();
       scrollTrigger?.kill();
       timeline?.kill();
-      gsap.killTweensOf([strokes, fillWrap].filter(Boolean));
+      gsap.killTweensOf([strokes, fillWrap, ...fillChars].filter(Boolean));
     };
   }, [dash, drawDuration, fillDelay, repeatDelay, stagger, ease, trigger, fillMode, reverse]);
 
@@ -324,8 +343,9 @@ export default function StrokeText({
       role="img"
       aria-label={String(text ?? '')}
     >
-      {/* Layer 1: Skeleton Stroke Outlines */}
+      {/* Single Unified SVG Container (100% pixel-perfect stroke and fill alignment) */}
       <svg className="stroke-text__svg" viewBox={viewBox} preserveAspectRatio="xMinYMid meet" aria-hidden="true">
+        {/* Layer 1: Skeleton Stroke Outlines */}
         <text
           ref={strokeTextRef}
           className="stroke-text__stroke"
@@ -348,11 +368,9 @@ export default function StrokeText({
             </tspan>
           ))}
         </text>
-      </svg>
 
-      {/* Layer 2: Solid Fill Color Layer (Clips across skeleton outline once drawn) */}
-      <span ref={fillWrapRef} className="stroke-text__fill-wrap" aria-hidden="true">
-        <svg className="stroke-text__svg" viewBox={viewBox} preserveAspectRatio="xMinYMid meet">
+        {/* Layer 2: Solid Fill Color Layer (Floods directly inside skeleton structure) */}
+        <g ref={fillWrapRef} className="stroke-text__fill-group">
           <text
             className="stroke-text__fill"
             x="0"
@@ -366,13 +384,14 @@ export default function StrokeText({
                 key={`f-${index}`}
                 fill={item.fill}
                 className={item.isAccent ? 'stroke-text__accent-fill' : undefined}
+                style={{ fillOpacity: 0 }}
               >
                 {item.char}
               </tspan>
             ))}
           </text>
-        </svg>
-      </span>
+        </g>
+      </svg>
     </span>
   );
 }

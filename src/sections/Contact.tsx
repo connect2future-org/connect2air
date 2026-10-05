@@ -54,8 +54,8 @@ export default function Contact() {
   return (
     <section id="contact" className="relative bg-[#070208] pt-12 pb-16 sm:pt-16 sm:pb-24 border-t border-pink-500/20 overflow-hidden scroll-mt-24">
       {/* Ambient Neon Background Glows */}
-      <div className="pointer-events-none absolute -left-40 top-1/4 h-[500px] w-[500px] rounded-full bg-pink-600/15 blur-[160px]" />
-      <div className="pointer-events-none absolute -right-40 bottom-10 h-[500px] w-[500px] rounded-full bg-purple-600/15 blur-[160px]" />
+      <div className="pointer-events-none absolute -left-40 top-1/4 h-[400px] w-[400px] rounded-full bg-pink-600/15 blur-3xl" />
+      <div className="pointer-events-none absolute -right-40 bottom-10 h-[400px] w-[400px] rounded-full bg-purple-600/15 blur-3xl" />
 
       <div className="container-page relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
         

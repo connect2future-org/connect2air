@@ -30,7 +30,6 @@ export function useSmoothScroll() {
       lenis.raf(time * 1000);
     };
     gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
 
     // Refresh ScrollTrigger cached pin positions after DOM layout & images settle
     const t1 = setTimeout(() => ScrollTrigger.refresh(), 300);
