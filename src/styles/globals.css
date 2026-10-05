@@ -61,13 +61,6 @@ a, button {
   cursor: pointer;
 }
 
-@media (hover: hover) {
-  html.has-custom-cursor,
-  html.has-custom-cursor * {
-    cursor: none !important;
-  }
-}
-
 .font-display {
   font-family: var(--font-display);
 }
