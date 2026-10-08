@@ -43,7 +43,7 @@ export default function Statement() {
 
   return (
     <div ref={wrapRef} className="relative h-screen overflow-hidden bg-[var(--color-void)]">
-      <PixelField progressRef={progressRef} className="absolute inset-0 h-full w-full opacity-70" />
+      <PixelField progressRef={progressRef} className="absolute inset-0 h-full w-full opacity-95" />
 
       <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
         <div ref={captionRef} className="eyebrow mb-8 opacity-0">

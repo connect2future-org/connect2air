@@ -235,41 +235,7 @@ export default function Services() {
             style={{ top: `${90 + i * 16}px`, zIndex: i + 10 }}
           >
             <div className="container-page">
-              <ElectricBorder color="#ff007f" speed={1} chaos={0.07} borderRadius={24}>
-                <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#240913]/95 via-[#1a060e]/95 to-[#100308]/95 p-8 sm:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.8)] backdrop-blur-2xl transition-all duration-500 hover:shadow-[0_0_50px_rgba(255,77,109,0.3)] hover:-translate-y-1">
-                  
-                  {/* Vibrant ambient background glow effect */}
-                  <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-rose-500/15 blur-3xl transition-all duration-700 group-hover:bg-pink-500/30 group-hover:scale-125" />
-                  <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-red-600/15 blur-3xl transition-all duration-700 group-hover:bg-red-500/30" />
-
-                  <div className="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-center sm:gap-12">
-                    {/* Service Number & Category */}
-                    <div className="flex items-center gap-4 sm:w-1/3">
-                      <span className="font-mono text-3xl font-black text-pink-400 text-glow drop-shadow-[0_0_15px_rgba(255,77,109,0.6)]">
-                        {service.number}
-                      </span>
-                      <div className="h-8 w-px bg-pink-500/30" />
-                      <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-pink-300 bg-pink-500/15 border border-pink-400/30 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(255,42,85,0.2)]">
-                        {service.category}
-                      </span>
-                    </div>
-
-                    {/* Title & Description */}
-                    <div className="sm:w-2/3">
-                      <h3 className="font-display text-2xl font-extrabold uppercase leading-[1.08] tracking-tight sm:text-4xl text-white group-hover:text-pink-200 transition-colors drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
-                        {service.title}
-                      </h3>
-                      <p className="mt-4 text-base font-medium text-white/90 leading-relaxed max-w-xl">
-                        {service.description}
-                      </p>
-                      <div className="mt-6 h-0.5 w-full max-w-lg bg-white/10 rounded-full overflow-hidden">
-                        <div className="h-full w-0 bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 transition-all duration-700 group-hover:w-full" />
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              </ElectricBorder>
+              <ServiceCard service={service} index={i} />
             </div>
           </div>
         ))}
@@ -278,10 +244,16 @@ export default function Services() {
       {/* POPUP MODAL FOR PRICING CARD DETAILS */}
       {selectedPricing && (
         <div
-          className="fixed inset-0 z-[140] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4"
+          data-lenis-prevent
+          data-lenis-prevent-wheel
+          data-lenis-prevent-touch
+          className="fixed inset-0 z-[140] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 overflow-hidden"
           onClick={() => setSelectedPricing(null)}
         >
           <div
+            data-lenis-prevent
+            data-lenis-prevent-wheel
+            data-lenis-prevent-touch
             className="relative w-full max-w-lg bg-[#16060c] border border-rose-500/40 rounded-3xl p-6 sm:p-8 shadow-[0_0_60px_rgba(255,42,85,0.35)] animate-fadeIn overflow-y-auto max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -401,5 +373,101 @@ function VideoCameraIcon({ className = 'h-5 w-5' }: { className?: string }) {
       <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11" />
       <rect width="14" height="12" x="2" y="6" rx="2" />
     </svg>
+  );
+}
+
+function ServiceCard({ service, index }: { service: ServiceItem; index: number }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = -((y - centerY) / centerY) * 7;
+    const rotateY = ((x - centerX) / centerX) * 7;
+
+    setTilt({ x: rotateX, y: rotateY });
+    setMousePos({ x: (x / rect.width) * 100, y: (y / rect.height) * 100 });
+  };
+
+  const handleMouseEnter = () => setIsHovered(true);
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setTilt({ x: 0, y: 0 });
+  };
+
+  return (
+    <ElectricBorder color="#ff007f" speed={1} chaos={0.07} borderRadius={24}>
+      <div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          transform: isHovered
+            ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(1.02, 1.02, 1.02)`
+            : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+          transition: isHovered ? 'transform 0.15s ease-out' : 'transform 0.5s ease-out',
+        }}
+        className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#240913]/95 via-[#1a060e]/95 to-[#100308]/95 p-7 sm:p-11 shadow-[0_10px_40px_rgba(0,0,0,0.8)] backdrop-blur-2xl transition-all duration-500 hover:shadow-[0_0_60px_rgba(255,0,127,0.4)] border border-pink-500/20 cursor-pointer"
+      >
+        {/* Dynamic interactive spotlight glow tracking cursor */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{
+            background: `radial-gradient(600px circle at ${mousePos.x}% ${mousePos.y}%, rgba(255,0,127,0.18), transparent 45%)`,
+          }}
+        />
+
+        {/* Ambient background glow elements */}
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-rose-500/15 blur-3xl transition-all duration-700 group-hover:bg-pink-500/35 group-hover:scale-125" />
+        <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-red-600/15 blur-3xl transition-all duration-700 group-hover:bg-pink-600/35" />
+
+        {/* Shimmer laser top accent edge line */}
+        <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-pink-500/60 to-transparent opacity-70 group-hover:opacity-100 transition-opacity" />
+
+        <div className="relative z-10 flex flex-col justify-between gap-6 sm:flex-row sm:items-center sm:gap-12">
+          {/* Service Number & Category with live radar beacon */}
+          <div className="flex items-center gap-4 sm:w-1/3">
+            <span className="font-mono text-3xl sm:text-4xl font-black text-pink-400 text-glow drop-shadow-[0_0_15px_rgba(255,77,109,0.7)] group-hover:scale-110 transition-transform duration-300">
+              {service.number}
+            </span>
+            <div className="h-8 w-px bg-pink-500/30" />
+            <div className="flex items-center gap-2 bg-pink-500/15 border border-pink-400/30 px-3.5 py-1.5 rounded-full shadow-[0_0_12px_rgba(255,42,85,0.25)]">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500" />
+              </span>
+              <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-pink-300">
+                {service.category}
+              </span>
+            </div>
+          </div>
+
+          {/* Title & Description & Animated Glowing Progress Bar */}
+          <div className="sm:w-2/3">
+            <h3 className="font-display text-2xl sm:text-4xl font-black uppercase leading-[1.08] tracking-tight text-white group-hover:text-pink-200 transition-colors drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
+              {service.title}
+            </h3>
+            <p className="mt-4 text-base font-medium text-white/90 leading-relaxed max-w-xl">
+              {service.description}
+            </p>
+
+            {/* Glowing Accent Progress Line */}
+            <div className="mt-6 relative h-1 w-full max-w-lg bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full w-0 bg-gradient-to-r from-pink-500 via-rose-400 to-red-500 transition-all duration-700 ease-out group-hover:w-full shadow-[0_0_15px_rgba(255,0,127,0.9)]" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </ElectricBorder>
   );
 }

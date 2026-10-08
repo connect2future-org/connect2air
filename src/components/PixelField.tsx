@@ -22,10 +22,11 @@ function sampleTextPoints(text: string, width: number, height: number, count: nu
   const ctx = off.getContext('2d')!;
   ctx.fillStyle = '#fff';
   const isMobile = width < 768;
-  const textY = isMobile ? height * 0.22 : height / 2;
+  // Always position particle wordmark above the headline text (around 20-22% height)
+  const textY = height * 0.22;
   const fontSize = isMobile
-    ? Math.min((width * 0.82) / (text.length * 0.58), height * 0.18)
-    : Math.min((width * 0.75) / (text.length * 0.58), height * 0.45);
+    ? Math.min((width * 0.82) / (text.length * 0.58), height * 0.16)
+    : Math.min((width * 0.70) / (text.length * 0.58), height * 0.20);
 
   ctx.font = `800 ${fontSize}px Manrope, Inter, sans-serif`;
   ctx.textAlign = 'center';
@@ -81,7 +82,8 @@ export default function PixelField({ progressRef, label = 'CONNECT2AIR', classNa
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isSmall = window.innerWidth < 768;
-    const COUNT = reduced ? 0 : isSmall ? 300 : 650;
+    // Bright, vibrant particle density
+    const COUNT = reduced ? 0 : isSmall ? 400 : 750;
 
     function build() {
       const w = window.innerWidth;
@@ -105,9 +107,9 @@ export default function PixelField({ progressRef, label = 'CONNECT2AIR', classNa
           wy: wordPoints[i].y,
           dx: Math.random() * w,
           dy: Math.random() * h,
-          size: Math.random() * 2.4 + 1.1,
+          size: Math.random() * 2.5 + 1.3,
           seed: Math.random() * 1000,
-          hue: Math.random() < 0.08 ? 'signal' : 'ink',
+          hue: Math.random() < 0.1 ? 'signal' : 'ink',
         });
       }
       particlesRef.current = particles;
@@ -163,15 +165,16 @@ export default function PixelField({ progressRef, label = 'CONNECT2AIR', classNa
         } else {
           x = particle.ix + (particle.wx - particle.ix) * formPhase;
           y = particle.iy + (particle.wy - particle.iy) * formPhase;
-          alpha = 0.65 + formPhase * 0.35;
+          alpha = 0.7 + formPhase * 0.3;
         }
 
         x += drift * (1 - formPhase * 0.7);
         y += driftY * (1 - formPhase * 0.7);
 
-        const flicker = 0.85 + Math.sin(time * 3 + particle.seed) * 0.15;
+        const flicker = 0.88 + Math.sin(time * 3 + particle.seed) * 0.12;
+        // Bright, vibrant particle transparency & pure colors
         ctx!.globalAlpha = Math.max(0, Math.min(1, alpha * flicker));
-        ctx!.fillStyle = particle.hue === 'signal' ? '#F20A83' : '#FFFFFF';
+        ctx!.fillStyle = particle.hue === 'signal' ? '#FF007F' : '#FFFFFF';
         ctx!.fillRect(x, y, particle.size, particle.size);
       }
       ctx!.globalAlpha = 1;

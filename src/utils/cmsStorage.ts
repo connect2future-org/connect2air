@@ -42,9 +42,38 @@ export interface MediaItem {
   description?: string;
   type: 'video' | 'image';
   url: string;
+  coverUrl?: string; // Cover page / poster thumbnail for uploaded videos
   aspectRatio: 'portrait';
   size: 'reel' | 'post' | 'square'; // reel=9:16, post=4:5, square=1:1
   createdAt: string;
+}
+
+export function getVideoPosterUrl(videoUrl: string, customCoverUrl?: string): string {
+  if (customCoverUrl && customCoverUrl.trim()) {
+    return customCoverUrl.trim();
+  }
+  if (!videoUrl) return '';
+  if (videoUrl.includes('cloudinary.com') && videoUrl.includes('/video/upload/')) {
+    return videoUrl.replace(/\.(mp4|webm|mov|m4v|mkv)$/i, '.jpg');
+  }
+  return '';
+}
+
+// Normalise a raw API response item to MediaItem shape
+function normaliseMedia(raw: any): MediaItem {
+  return {
+    id: raw._id || raw.id,
+    _id: raw._id,
+    title: raw.title,
+    tagline: raw.tagline || '',
+    description: raw.description || '',
+    type: raw.type,
+    url: raw.url,
+    coverUrl: raw.coverUrl || raw.posterUrl || '',
+    aspectRatio: 'portrait',
+    size: raw.size || 'reel', // default to reel if missing
+    createdAt: raw.createdAt || new Date().toISOString(),
+  };
 }
 
 export interface DroneSpec {
@@ -199,22 +228,6 @@ async function parseJsonResponse(res: Response) {
   return res.json();
 }
 
-// Normalise a raw API response item to MediaItem shape
-function normaliseMedia(raw: any): MediaItem {
-  return {
-    id: raw._id || raw.id,
-    _id: raw._id,
-    title: raw.title,
-    tagline: raw.tagline || '',
-    description: raw.description || '',
-    type: raw.type,
-    url: raw.url,
-    aspectRatio: 'portrait',
-    size: raw.size || 'reel', // default to reel if missing
-    createdAt: raw.createdAt || new Date().toISOString(),
-  };
-}
-
 // GET all media from backend
 export async function getCMSMediaAsync(): Promise<MediaItem[]> {
   try {
@@ -222,7 +235,7 @@ export async function getCMSMediaAsync(): Promise<MediaItem[]> {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await parseJsonResponse(res);
     if (json.success && Array.isArray(json.data)) {
-      return json.data.map(normaliseMedia);
+      return filterDeletedItems(json.data.map(normaliseMedia));
     }
     return [];
   } catch (err) {
