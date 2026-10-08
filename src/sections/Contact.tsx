@@ -185,18 +185,18 @@ export default function Contact() {
           </div>
 
 
-          {/* ── CENTER COLUMN: Polygon Skewed Form Card Matching Reference Image 1-to-1 ── */}
-          <div className="lg:col-span-5">
-            <div className="relative group max-w-lg mx-auto lg:max-w-none">
+          {/* ── CENTER COLUMN: Polygon Skewed Form Card Centered & Tightened ── */}
+          <div className="lg:col-span-5 flex justify-center">
+            <div className="relative group w-full max-w-[440px] mx-auto">
               
               {/* Hot Pink Rotated Outer Layer Backdrop Card */}
-              <div className="absolute -inset-4 sm:-inset-6 bg-gradient-to-br from-[#ff007f] via-[#e60067] to-[#800040] rounded-[48px] transform -rotate-[5deg] scale-[1.02] shadow-[0_10px_50px_rgba(255,0,127,0.45)] transition-transform duration-500 group-hover:-rotate-[3deg]" />
+              <div className="absolute -inset-3 sm:-inset-4 bg-gradient-to-br from-[#ff007f] via-[#e60067] to-[#800040] rounded-[40px] transform -rotate-[3.5deg] scale-[1.01] shadow-[0_10px_40px_rgba(255,0,127,0.4)] transition-transform duration-500 group-hover:-rotate-[2deg]" />
               
               {/* Main White Tilted Polygon Card */}
-              <div className="relative bg-white text-gray-900 rounded-[32px] p-6 sm:p-7 shadow-2xl overflow-hidden border border-gray-100/90 transform -rotate-[1.8deg] transition-transform duration-500 group-hover:rotate-0">
+              <div className="relative bg-white text-gray-900 rounded-[28px] p-5 sm:p-6 shadow-2xl overflow-hidden border border-gray-100/90 transform -rotate-[1.5deg] transition-transform duration-500 group-hover:rotate-0">
                 
                 {/* Top Right Curved Sunset Image Badge Accent (Curved Wedge Clipping) */}
-                <div className="absolute top-0 right-0 w-[50%] h-[38%] overflow-hidden rounded-bl-[100px] pointer-events-none z-10 border-b-2 border-l-2 border-white shadow-sm">
+                <div className="absolute top-0 right-0 w-[44%] h-[34%] overflow-hidden rounded-bl-[85px] pointer-events-none z-10 border-b-2 border-l-2 border-white shadow-sm">
                   <img
                     src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
                     alt="Sunset Sky Aerial Display"
@@ -206,26 +206,26 @@ export default function Contact() {
                 </div>
 
                 {/* Card Subtitle (Cursive Signature Font) & Title */}
-                <div className="relative z-20 mb-5 max-w-[210px] sm:max-w-[230px]">
+                <div className="relative z-20 mb-4 max-w-[195px] sm:max-w-[210px]">
                   <p
-                    className="text-2xl sm:text-3xl text-[#e60067] font-bold block leading-none mb-1.5"
+                    className="text-2xl sm:text-3xl text-[#e60067] font-bold block leading-none mb-1"
                     style={{ fontFamily: "'Caveat', 'Dancing Script', cursive" }}
                   >
                     Send us an Enquiry
                   </p>
-                  <h3 className="font-sans font-extrabold text-2xl sm:text-3xl text-[#111111] tracking-tight leading-[1.1]">
+                  <h3 className="font-sans font-extrabold text-xl sm:text-2xl text-[#111111] tracking-tight leading-[1.1]">
                     Let&apos;s Plan<br />Your Aerial Campaign
                   </h3>
                 </div>
 
                 {/* Form Fields */}
-                <form onSubmit={submit} className="relative z-20 space-y-3">
+                <form onSubmit={submit} className="relative z-20 space-y-2.5">
                   {/* Row 1: Name & Email */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </span>
                         <input
                           type="text"
@@ -233,15 +233,15 @@ export default function Contact() {
                           placeholder="Your Name *"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-9 pr-3 py-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all shadow-sm"
+                          className="w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-8 pr-2.5 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all shadow-sm"
                         />
                       </div>
                     </div>
 
                     <div>
                       <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                         </span>
                         <input
                           type="email"
@@ -249,18 +249,18 @@ export default function Contact() {
                           placeholder="Email Address *"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-9 pr-3 py-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all shadow-sm"
+                          className="w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-8 pr-2.5 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all shadow-sm"
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Row 2: Phone & Company */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                         </span>
                         <input
                           type="tel"
@@ -268,22 +268,22 @@ export default function Contact() {
                           placeholder="Phone Number *"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className="w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-9 pr-3 py-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all shadow-sm"
+                          className="w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-8 pr-2.5 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all shadow-sm"
                         />
                       </div>
                     </div>
 
                     <div>
                       <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v8h20v-8a2 2 0 0 0-2-2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v8h20v-8a2 2 0 0 0-2-2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
                         </span>
                         <input
                           type="text"
                           placeholder="Company / Organization"
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                          className="w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-9 pr-3 py-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all shadow-sm"
+                          className="w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-8 pr-2.5 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all shadow-sm"
                         />
                       </div>
                     </div>
@@ -292,13 +292,13 @@ export default function Contact() {
                   {/* Row 3: Dropdown Select Type of Event */}
                   <div>
                     <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                       </span>
                       <select
                         value={formData.eventType}
                         onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
-                        className={`w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-9 pr-8 py-2.5 text-xs focus:outline-none transition-all appearance-none cursor-pointer shadow-sm ${formData.eventType ? 'text-gray-900' : 'text-gray-400'}`}
+                        className={`w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-8 pr-8 py-2 text-xs focus:outline-none transition-all appearance-none cursor-pointer shadow-sm ${formData.eventType ? 'text-gray-900' : 'text-gray-400'}`}
                       >
                         <option value="" disabled hidden>Type of Event *</option>
                         <option value="Brand Launch">Brand Launch</option>
@@ -310,8 +310,8 @@ export default function Contact() {
                         <option value="Real Estate">Real Estate Promotion</option>
                         <option value="Custom Campaign">Custom Aerial Display</option>
                       </select>
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
                       </span>
                     </div>
                   </div>
@@ -319,17 +319,17 @@ export default function Contact() {
                   {/* Row 4: Textarea Tell Us About Event */}
                   <div>
                     <div className="relative">
-                      <span className="absolute left-3.5 top-3 text-gray-400">
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                      <span className="absolute left-3 top-2.5 text-gray-400">
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                       </span>
                       <textarea
                         required
-                        rows={3}
+                        rows={2.5}
                         maxLength={300}
                         placeholder="Tell us about your event or campaign *&#10;Event location, date, audience, number of flights, key requirements..."
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        className="w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-9 pr-3 pt-2.5 pb-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all resize-none shadow-sm"
+                        className="w-full bg-[#f2f2f4] border border-gray-200/80 focus:border-pink-500 focus:bg-white rounded-xl pl-8 pr-2.5 pt-2 pb-1 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none transition-all resize-none shadow-sm"
                       />
                     </div>
                     <div className="text-[10px] font-mono font-bold text-gray-400 text-right mt-0.5">
@@ -338,13 +338,13 @@ export default function Contact() {
                   </div>
 
                   {/* Submit Hot-Pink Pill Button */}
-                  <div className="pt-2">
+                  <div className="pt-1.5">
                     <button
                       type="submit"
                       disabled={status === 'sending'}
-                      className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-[#ff007f] via-[#e60067] to-[#d8005f] hover:from-[#e60067] hover:to-[#ff007f] text-white font-extrabold text-xs uppercase tracking-wider shadow-[0_6px_25px_rgba(230,0,103,0.45)] transition-all transform hover:scale-[1.01] active:scale-98 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-3 px-6 rounded-full bg-gradient-to-r from-[#ff007f] via-[#e60067] to-[#d8005f] hover:from-[#e60067] hover:to-[#ff007f] text-white font-extrabold text-xs uppercase tracking-wider shadow-[0_6px_25px_rgba(230,0,103,0.45)] transition-all transform hover:scale-[1.01] active:scale-98 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <svg className="w-4 h-4 text-white fill-current transform -rotate-45" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 text-white fill-current transform -rotate-45" viewBox="0 0 24 24">
                         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                       </svg>
                       <span>{status === 'sending' ? 'SENDING...' : 'SEND ENQUIRY →'}</span>
@@ -385,8 +385,10 @@ export default function Contact() {
                 className="bg-[#15060d]/90 border border-pink-500/30 rounded-2xl p-3 flex items-center justify-between hover:border-pink-400 transition-colors group shadow-md"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8.5 h-8.5 rounded-full bg-pink-600 text-white flex items-center justify-center text-xs shrink-0 shadow-[0_0_12px_rgba(255,0,127,0.5)] group-hover:scale-110 transition-transform">
-                    <MailIcon className="w-4 h-4 text-white" />
+                  <div className="w-8.5 h-8.5 rounded-full bg-[#e60067] text-white flex items-center justify-center text-xs shrink-0 shadow-[0_0_12px_rgba(230,0,103,0.5)] group-hover:scale-110 transition-transform">
+                    <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.89 2 1.99 2H20c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                    </svg>
                   </div>
                   <div className="min-w-0">
                     <div className="text-[9.5px] font-mono font-bold text-pink-300 uppercase tracking-wider">Email Us</div>
@@ -406,7 +408,9 @@ export default function Contact() {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8.5 h-8.5 rounded-full bg-[#990044] text-white flex items-center justify-center text-xs shrink-0 shadow-[0_0_12px_rgba(153,0,68,0.5)] group-hover:scale-110 transition-transform">
-                    <PhoneIcon className="w-4 h-4 text-white" />
+                    <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                    </svg>
                   </div>
                   <div className="min-w-0">
                     <div className="text-[9.5px] font-mono font-bold text-pink-300 uppercase tracking-wider">Call Us</div>
@@ -442,7 +446,7 @@ export default function Contact() {
               </a>
             </div>
 
-            {/* Social Media Journey Row */}
+            {/* Social Media Journey Row (Instagram, LinkedIn, WhatsApp) */}
             <div className="pt-2">
               <div className="flex items-center gap-2 mb-2.5">
                 <span className="font-mono text-[10px] font-bold text-white/70 uppercase tracking-wider">
@@ -458,7 +462,7 @@ export default function Contact() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Instagram"
-                  className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] text-white flex items-center justify-center transition-all hover:scale-110 shadow-[0_0_12px_rgba(213,41,118,0.5)]"
+                  className="w-9 h-9 rounded-full bg-[#E1306C] text-white flex items-center justify-center transition-all hover:scale-110 shadow-[0_0_12px_rgba(225,48,108,0.5)]"
                 >
                   <InstagramIcon className="w-4.5 h-4.5 text-white" />
                 </a>
@@ -483,17 +487,6 @@ export default function Contact() {
                   className="w-9 h-9 rounded-full bg-[#25d366] text-white flex items-center justify-center transition-all hover:scale-110 shadow-[0_0_12px_rgba(37,211,102,0.5)]"
                 >
                   <WhatsAppIcon className="w-4.5 h-4.5 text-white" />
-                </a>
-
-                {/* YouTube */}
-                <a
-                  href="https://www.youtube.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="YouTube"
-                  className="w-9 h-9 rounded-full bg-[#ff0000] text-white flex items-center justify-center transition-all hover:scale-110 shadow-[0_0_12px_rgba(255,0,0,0.5)]"
-                >
-                  <YouTubeIcon className="w-4.5 h-4.5 text-white" />
                 </a>
               </div>
             </div>
