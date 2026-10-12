@@ -18,6 +18,7 @@ import {
   addCMSDroneAsync,
   updateCMSDroneAsync,
   deleteCMSDroneAsync,
+  uploadCMSDroneImage,
   getCMSAccessoriesAsync,
   addCMSAccessoryAsync,
   updateCMSAccessoryAsync,
@@ -44,6 +45,7 @@ export default function AdminPage() {
   const [drones, setDrones] = useState<DroneItem[]>([]);
   const [editingDrone, setEditingDrone] = useState<DroneItem | null>(null);
   const [droneImageFile, setDroneImageFile] = useState<File | null>(null);
+  const [uploadingDroneImg, setUploadingDroneImg] = useState(false);
   const droneFileInputRef = useRef<HTMLInputElement>(null);
   const [droneForm, setDroneForm] = useState<{
     name: string;
@@ -298,18 +300,33 @@ export default function AdminPage() {
     }
   };
 
-  const handleDroneImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDroneImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 20 * 1024 * 1024) {
-      alert('Image size is too large (max 20MB).');
+    if (file.size > 25 * 1024 * 1024) {
+      alert('Image size is too large (max 25MB).');
       e.target.value = '';
       return;
     }
 
     setDroneImageFile(file);
+    setUploadingDroneImg(true);
 
+    try {
+      // 1. Try direct upload to Cloudinary via backend endpoint
+      const uploadedUrl = await uploadCMSDroneImage(file);
+      if (uploadedUrl) {
+        setDroneForm((prev) => ({ ...prev, imageUrl: uploadedUrl }));
+        showToast('Image uploaded and synced to cloud!');
+        setUploadingDroneImg(false);
+        return;
+      }
+    } catch (err) {
+      console.warn('Direct upload error, falling back to local compressed preview:', err);
+    }
+
+    // 2. Fallback: compress with canvas to 800x800 square JPEG
     const reader = new FileReader();
     reader.onload = (event) => {
       const rawDataUrl = event.target?.result as string;
@@ -323,7 +340,6 @@ export default function AdminPage() {
 
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          // Center crop 1:1 square
           const minDim = Math.min(img.width, img.height);
           const sx = (img.width - minDim) / 2;
           const sy = (img.height - minDim) / 2;
@@ -334,9 +350,11 @@ export default function AdminPage() {
         } else {
           setDroneForm((prev) => ({ ...prev, imageUrl: rawDataUrl }));
         }
+        setUploadingDroneImg(false);
       };
       img.onerror = () => {
         setDroneForm((prev) => ({ ...prev, imageUrl: rawDataUrl }));
+        setUploadingDroneImg(false);
       };
     };
     reader.readAsDataURL(file);
@@ -976,7 +994,7 @@ export default function AdminPage() {
                 {/* Image Upload / URL */}
                 <div>
                   <label className="block text-xs font-semibold text-pink-200 mb-1">
-                    Product Image (Upload File or Enter URL)
+                    Product Image (Upload File or Enter Direct URL)
                   </label>
                   <div className="space-y-2">
                     <input
@@ -984,26 +1002,37 @@ export default function AdminPage() {
                       type="file"
                       accept="image/*"
                       onChange={handleDroneImageUpload}
-                      className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3 py-2 text-xs text-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-pink-500 file:text-white file:font-bold file:text-xs hover:file:bg-pink-400"
+                      disabled={uploadingDroneImg}
+                      className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3 py-2 text-xs text-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-pink-500 file:text-white file:font-bold file:text-xs hover:file:bg-pink-400 disabled:opacity-50"
                     />
+                    {uploadingDroneImg && (
+                      <div className="flex items-center gap-2 text-pink-400 text-xs font-mono py-1 animate-pulse">
+                        <span>⏳</span>
+                        <span>Uploading image directly to cloud...</span>
+                      </div>
+                    )}
                     <div className="text-center font-mono text-[10px] text-white/40">— OR ENTER DIRECT URL —</div>
                     <input
-                      type="url"
-                      placeholder="https://images.unsplash.com/photo-..."
+                      type="text"
+                      placeholder="https://..."
                       value={droneForm.imageUrl}
                       onChange={(e) => setDroneForm({ ...droneForm, imageUrl: e.target.value })}
                       className="w-full bg-white/5 border border-pink-500/30 rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-pink-400"
                     />
                   </div>
                   {droneForm.imageUrl && (
-                    <div className="mt-2.5 relative rounded-xl border border-pink-500/30 overflow-hidden h-32 bg-black/40 flex items-center justify-center">
+                    <div className="mt-2.5 relative rounded-xl border border-pink-500/30 overflow-hidden h-36 bg-black/40 flex items-center justify-center group">
                       <img src={droneForm.imageUrl} alt="Preview" className="h-full w-full object-contain" />
                       <button
                         type="button"
-                        onClick={() => setDroneForm({ ...droneForm, imageUrl: '' })}
-                        className="absolute top-2 right-2 px-2 py-0.5 bg-red-500/80 text-white rounded text-[10px] font-mono font-bold"
+                        onClick={() => {
+                          setDroneForm({ ...droneForm, imageUrl: '' });
+                          setDroneImageFile(null);
+                          if (droneFileInputRef.current) droneFileInputRef.current.value = '';
+                        }}
+                        className="absolute top-2 right-2 px-2.5 py-1 bg-red-600/90 hover:bg-red-600 text-white rounded-lg text-xs font-mono font-bold shadow-md transition"
                       >
-                        Remove
+                        ✕ Remove Image
                       </button>
                     </div>
                   )}

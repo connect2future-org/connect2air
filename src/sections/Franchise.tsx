@@ -97,10 +97,10 @@ export default function Franchise() {
               </button>
             )}
 
-            {/* Static Drone Cards Scroll Track */}
+            {/* Drone Cards Track */}
             <div
               ref={droneScrollRef}
-              className="flex gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-none py-3 px-1 w-full"
+              className="flex gap-5 sm:gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-none py-3 px-1 w-full"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {drones.map((drone, index) => {
@@ -110,82 +110,84 @@ export default function Franchise() {
                   'https://images.unsplash.com/photo-1521405924368-64c5b84bec60?auto=format&fit=crop&w=800&q=80',
                   'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=800&q=80',
                 ];
-                const displayImg = drone.imageUrl || defaultImages[index % defaultImages.length];
-
-                const spec1 = drone.specs?.[0] || { label: 'Camera', value: '4K' };
-                const spec2 = drone.specs?.[1] || { label: 'Flight Time', value: '34 Mins' };
-                const spec3 = drone.specs?.[2] || { label: 'Range', value: '8 km' };
+                const displayImg = (drone.imageUrl && drone.imageUrl.trim()) ? drone.imageUrl.trim() : defaultImages[index % defaultImages.length];
 
                 return (
                   <div
-                    key={drone.id || drone.name}
-                    className="w-64 sm:w-72 shrink-0 snap-center rounded-2xl bg-gradient-to-b from-[#14071c] via-[#0d0413] to-[#08020b] border border-pink-500/30 transition-all duration-300 hover:scale-[1.04] hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(255,20,147,0.35)] hover:border-pink-500/80 z-10 hover:z-30 overflow-hidden flex flex-col justify-between group p-4 shadow-xl relative select-none"
+                    key={drone.id || drone._id || drone.name}
+                    className="w-full sm:w-[380px] md:w-[420px] max-w-[440px] shrink-0 snap-center rounded-2xl bg-gradient-to-b from-[#14071c] via-[#0d0413] to-[#08020b] border border-pink-500/30 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1.5 hover:shadow-[0_12px_40px_rgba(255,20,147,0.35)] hover:border-pink-500/80 z-10 hover:z-30 overflow-hidden flex flex-col justify-between group p-5 sm:p-6 shadow-xl relative select-none"
                   >
-                    {/* Image Stage with Neon Pedestal */}
-                    <div className="w-full h-40 sm:h-44 relative flex items-center justify-center bg-black/40 rounded-xl overflow-hidden mb-3 border border-white/5 shrink-0">
-                      <div className="absolute inset-0 bg-gradient-to-t from-pink-500/20 via-transparent to-transparent opacity-80" />
-                      
-                      {/* Neon Pedestal Glow Floor Ring */}
-                      <div className="absolute bottom-1 w-3/4 h-5 rounded-[100%] bg-pink-500/50 blur-md border border-pink-400/60 shadow-[0_0_20px_rgba(255,20,147,0.9)]" />
+                    <div>
+                      {/* Image Stage with Neon Pedestal */}
+                      <div className="w-full h-48 sm:h-52 relative flex items-center justify-center bg-black/40 rounded-xl overflow-hidden mb-4 border border-white/5 shrink-0">
+                        <div className="absolute inset-0 bg-gradient-to-t from-pink-500/20 via-transparent to-transparent opacity-80" />
+                        
+                        {/* Neon Pedestal Glow Floor Ring */}
+                        <div className="absolute bottom-1 w-3/4 h-5 rounded-[100%] bg-pink-500/50 blur-md border border-pink-400/60 shadow-[0_0_20px_rgba(255,20,147,0.9)]" />
 
-                      <img
-                        src={displayImg}
-                        alt={drone.name}
-                        className="w-full h-full object-contain p-2 relative z-10 transition-transform duration-500 group-hover:scale-105"
-                      />
+                        <img
+                          src={displayImg}
+                          alt={drone.name}
+                          className="w-full h-full object-contain p-2 relative z-10 transition-transform duration-500 group-hover:scale-105"
+                        />
 
-                      {drone.badge && (
-                        <span className="absolute top-2 right-2 font-mono text-[8px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-500 text-white shadow-[0_0_10px_rgba(255,20,147,0.8)] border border-pink-300 z-20">
-                          {drone.badge}
-                        </span>
+                        {drone.badge && (
+                          <span className="absolute top-2.5 right-2.5 font-mono text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-pink-500 text-white shadow-[0_0_10px_rgba(255,20,147,0.8)] border border-pink-300 z-20">
+                            {drone.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Title & Tagline */}
+                      <div className="mb-3">
+                        <h3 className="font-display font-bold text-base sm:text-lg text-white tracking-wide leading-snug group-hover:text-pink-300 transition-colors">
+                          {drone.name}
+                        </h3>
+                        {drone.tagline && (
+                          <p className="text-xs text-white/60 font-medium mt-1 leading-snug">
+                            {drone.tagline}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Clean 2-column Spec Badges with ZERO text overlap */}
+                      {drone.specs && drone.specs.length > 0 && (
+                        <div className="grid grid-cols-2 gap-2 bg-white/[0.03] border border-white/10 rounded-xl p-2.5 mb-3.5 font-mono">
+                          {drone.specs.map((spec, sIdx) => (
+                            <div key={sIdx} className="min-w-0 bg-white/[0.02] border border-white/5 rounded-lg p-2 flex flex-col justify-center">
+                              <span className="text-[9px] text-pink-300/80 font-bold uppercase tracking-wider block truncate">
+                                {spec.label}
+                              </span>
+                              <strong className="text-xs text-white font-bold block break-words leading-tight mt-0.5">
+                                {spec.value}
+                              </strong>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Description Section — Fully visible without truncation */}
+                      {drone.description && (
+                        <div className="bg-white/[0.03] border border-white/10 rounded-xl p-3 mb-4 text-xs text-white/80 leading-relaxed font-sans">
+                          {drone.description}
+                        </div>
                       )}
                     </div>
 
-                    {/* Title & Tagline */}
-                    <div className="mb-2">
-                      <h3 className="font-display font-bold text-sm sm:text-base text-white tracking-wide leading-snug group-hover:text-pink-300 transition-colors">
-                        {drone.name}
-                      </h3>
-                      {drone.tagline && (
-                        <p className="text-[11px] text-white/60 font-medium truncate mt-0.5">
-                          {drone.tagline}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* 3 Spec Icons Grid */}
-                    <div className="grid grid-cols-3 gap-1 text-center bg-white/[0.03] border border-white/10 rounded-xl p-2 mb-3 font-mono">
-                      <div className="flex flex-col items-center justify-center">
-                        <span className="text-xs mb-0.5">📷</span>
-                        <strong className="text-[11px] text-white font-bold block truncate">{spec1.value}</strong>
-                        <span className="text-[9px] text-white/40 block truncate">{spec1.label}</span>
+                    {/* Price Tag & Action at Bottom */}
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-between mt-auto">
+                      <div>
+                        <span className="text-[9px] font-mono text-white/50 uppercase block">INDICATIVE PRICE</span>
+                        <strong className="font-display font-black text-xl text-pink-500 block text-glow leading-none mt-0.5">
+                          {drone.price}
+                        </strong>
                       </div>
-
-                      <div className="flex flex-col items-center justify-center border-x border-white/10 px-1">
-                        <span className="text-xs mb-0.5">⏱️</span>
-                        <strong className="text-[11px] text-white font-bold block truncate">{spec2.value}</strong>
-                        <span className="text-[9px] text-white/40 block truncate">{spec2.label}</span>
-                      </div>
-
-                      <div className="flex flex-col items-center justify-center">
-                        <span className="text-xs mb-0.5">📡</span>
-                        <strong className="text-[11px] text-white font-bold block truncate">{spec3.value}</strong>
-                        <span className="text-[9px] text-white/40 block truncate">{spec3.label}</span>
-                      </div>
-                    </div>
-
-                    {/* Description Section */}
-                    {drone.description && (
-                      <div className="bg-white/[0.03] border border-white/10 rounded-xl p-2.5 mb-3 text-[11px] text-white/70 leading-relaxed line-clamp-2 min-h-[42px]">
-                        {drone.description}
-                      </div>
-                    )}
-
-                    {/* Price Tag at Bottom */}
-                    <div className="pt-1">
-                      <strong className="font-display font-black text-lg sm:text-xl text-pink-500 block text-glow leading-none">
-                        {drone.price}
-                      </strong>
+                      <a
+                        href="#contact"
+                        className="px-4 py-2 bg-pink-500/20 hover:bg-pink-500 text-pink-300 hover:text-white border border-pink-500/40 rounded-xl text-xs font-mono font-bold transition shadow-sm"
+                      >
+                        Enquire →
+                      </a>
                     </div>
                   </div>
                 );
@@ -299,9 +301,9 @@ export default function Franchise() {
                       )}
                     </div>
 
-                    {/* Description Section */}
+                    {/* Description Section — Fully visible */}
                     {(acc.desc || acc.description) && (
-                      <div className="bg-white/[0.03] border border-white/10 rounded-xl p-2.5 mb-3 text-[11px] text-white/70 leading-relaxed line-clamp-2 min-h-[42px]">
+                      <div className="bg-white/[0.03] border border-white/10 rounded-xl p-2.5 mb-3 text-xs text-white/70 leading-relaxed">
                         {acc.desc || acc.description}
                       </div>
                     )}

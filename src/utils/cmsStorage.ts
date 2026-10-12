@@ -743,9 +743,28 @@ export async function getCMSDronesAsync(): Promise<DroneItem[]> {
   cacheDronesToLocalStorage(clean);
   return clean;
 }
+ 
+export async function uploadCMSDroneImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const res = await fetch(`${API_BASE}/api/drones/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+    const json = await parseJsonResponse(res);
+    if (res.ok && json.success && json.url) {
+      return json.url;
+    }
+  } catch (err) {
+    console.warn('Direct drone image upload failed:', err);
+  }
+  return '';
+}
 
 export async function addCMSDroneAsync(drone: Omit<DroneItem, 'id'>): Promise<DroneItem> {
   removeDeletedRecord(undefined, drone.name);
+  let createdItem: DroneItem | null = null;
   try {
     const res = await fetch(`${API_BASE}/api/drones`, {
       method: 'POST',
@@ -753,36 +772,51 @@ export async function addCMSDroneAsync(drone: Omit<DroneItem, 'id'>): Promise<Dr
       body: JSON.stringify(drone),
     });
     const json = await parseJsonResponse(res);
-    if (res.ok && json.success) {
+    if (res.ok && json.success && json.data) {
       removeDeletedRecord(json.data._id, drone.name);
-      const createdItem: DroneItem = { id: json.data._id, _id: json.data._id, ...json.data };
-      const currentList = getCMSDrones();
-      const updatedList = [createdItem, ...currentList.filter((i) => i.id !== createdItem.id && i._id !== createdItem._id)];
-      saveCMSDrones(updatedList);
-      return createdItem;
+      createdItem = { id: json.data._id, _id: json.data._id, ...json.data };
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('Backend drone create failed, saving locally:', e);
+  }
 
-  const list = getCMSDrones();
-  const newItem: DroneItem = { id: `d_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`, ...drone, createdAt: new Date().toISOString() };
-  saveCMSDrones([newItem, ...list]);
-  return newItem;
+  const currentList = getCMSDrones();
+  const finalItem: DroneItem = createdItem || {
+    id: `d_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+    ...drone,
+    createdAt: new Date().toISOString(),
+  };
+  const updatedList = [finalItem, ...currentList.filter((i) => i.id !== finalItem.id && i._id !== finalItem._id && i.name !== finalItem.name)];
+  saveCMSDrones(updatedList);
+  notifyCMSUpdate();
+  return finalItem;
 }
 
 export async function updateCMSDroneAsync(id: string, droneData: Partial<DroneItem>): Promise<void> {
+  let serverData: Partial<DroneItem> | null = null;
   try {
     const res = await fetch(`${API_BASE}/api/drones/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(droneData),
     });
-    await parseJsonResponse(res);
-    notifyCMSUpdate();
+    const json = await parseJsonResponse(res);
+    if (res.ok && json.success && json.data) {
+      serverData = json.data;
+    }
   } catch (e) {
-    const list = getCMSDrones();
-    const updated = list.map((item) => (item.id === id ? { ...item, ...droneData } : item));
-    saveCMSDrones(updated);
+    console.warn('Backend drone update failed, saving locally:', e);
   }
+
+  const list = getCMSDrones();
+  const updated = list.map((item) => {
+    if (item.id === id || item._id === id || (item.name && droneData.name && item.name === droneData.name)) {
+      return { ...item, ...droneData, ...(serverData || {}) };
+    }
+    return item;
+  });
+  saveCMSDrones(updated);
+  notifyCMSUpdate();
 }
 
 export async function deleteCMSDroneAsync(id: string, name?: string): Promise<void> {

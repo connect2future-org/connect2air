@@ -1,5 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import multer from 'multer';
+import streamifier from 'streamifier';
 import { v2 as cloudinary } from 'cloudinary';
 import Drone from '../models/Drone.js';
 
@@ -12,6 +14,33 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB max
+});
+
+function uploadBufferToCloudinary(buffer, folder = 'connect2air/drones') {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        transformation: [
+          { width: 1000, height: 1000, crop: 'limit' },
+          { quality: 'auto', fetch_format: 'auto' },
+        ],
+      },
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary stream upload error:', error);
+          return reject(error);
+        }
+        resolve(result);
+      }
+    );
+    streamifier.createReadStream(buffer).pipe(uploadStream);
+  });
+}
+
 // Helper: Upload base64 image string to Cloudinary
 async function uploadBase64ToCloudinary(base64Str) {
   if (!base64Str || !base64Str.startsWith('data:image/')) return base64Str;
@@ -19,16 +48,30 @@ async function uploadBase64ToCloudinary(base64Str) {
     const res = await cloudinary.uploader.upload(base64Str, {
       folder: 'connect2air/drones',
       transformation: [
-        { width: 800, height: 800, crop: 'fill', gravity: 'auto' },
+        { width: 1000, height: 1000, crop: 'limit' },
         { quality: 'auto', fetch_format: 'auto' },
       ],
     });
     return res.secure_url;
   } catch (err) {
     console.error('Cloudinary upload error:', err);
-    return base64Str; // fallback to original base64 if Cloudinary upload fails
+    return base64Str;
   }
 }
+
+// POST /api/drones/upload — Upload drone image file directly
+router.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image file uploaded.' });
+    }
+    const uploaded = await uploadBufferToCloudinary(req.file.buffer);
+    res.json({ success: true, url: uploaded.secure_url });
+  } catch (err) {
+    console.error('Failed to upload drone image:', err);
+    res.status(500).json({ success: false, message: 'Failed to upload drone image.' });
+  }
+});
 
 const DEFAULT_DRONES = [
   {
